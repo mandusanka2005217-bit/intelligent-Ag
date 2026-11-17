@@ -12,7 +12,12 @@ import {
   X,
   Bell,
   Sprout,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles,
+  Truck,
+  Hourglass,
+  AlertOctagon,
+  Sliders
 } from 'lucide-react';
 import SimulatedBadge from '@/shared/components/SimulatedBadge';
 import Skeleton from '@/shared/components/Skeleton';
@@ -36,6 +41,13 @@ const navItems: NavItem[] = [
   { label: 'Allocation Engine', to: '/allocation', icon: <BarChart3 size={20} />, allowedRoles: ['admin'] },
   { label: 'Strategies', to: '/strategies', icon: <Scale size={20} />, allowedRoles: ['admin'] },
   { label: 'Price Trends', to: '/prices', icon: <TrendingUp size={20} />, allowedRoles: ['admin', 'farmer', 'buyer'] },
+  { label: 'Demand Forecast', to: '/intelligence/forecasting', icon: <Sparkles size={20} />, allowedRoles: ['admin'] },
+  { label: 'Transport VRP', to: '/intelligence/transportation', icon: <Truck size={20} />, allowedRoles: ['admin'] },
+  { label: 'Crop Freshness', to: '/intelligence/freshness', icon: <Hourglass size={20} />, allowedRoles: ['admin'] },
+  { label: 'Supply Risk Alerts', to: '/intelligence/risk', icon: <AlertOctagon size={20} />, allowedRoles: ['admin'] },
+  { label: 'Fair Pricing', to: '/intelligence/pricing', icon: <TrendingUp size={20} />, allowedRoles: ['admin'] },
+  { label: 'What-If Simulator', to: '/intelligence/simulation', icon: <Sliders size={20} />, allowedRoles: ['admin'] },
+  { label: 'Food Waste & CO2', to: '/intelligence/sustainability', icon: <Leaf size={20} />, allowedRoles: ['admin'] },
 ];
 
 const PageFallback: React.FC = () => (

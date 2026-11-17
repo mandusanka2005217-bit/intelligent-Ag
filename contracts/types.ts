@@ -533,6 +533,228 @@ export interface CsvUploadResult {
   totalRows: number;
 }
 
+// ---------------------------------------------------------------------------
+// Advanced Intelligence Module Contracts
+// ---------------------------------------------------------------------------
+
+// 1. Demand Forecasting
+export interface DemandForecastPoint {
+  date: string;
+  historicalKg: number | null;
+  predictedKg: number;
+  lowerBoundKg: number;
+  upperBoundKg: number;
+}
+
+export interface ProductDemandForecast {
+  product: Product;
+  currentDemandKg: number;
+  predicted7dKg: number;
+  predicted30dKg: number;
+  predicted90dKg: number;
+  growthPct: number;
+  trend: 'increasing' | 'stable' | 'decreasing';
+  confidencePct: number;
+}
+
+export interface DistrictDemandForecast {
+  district: string;
+  totalDemandKg: number;
+  sharePct: number;
+}
+
+export interface DemandForecastingResponse {
+  scenarioId: ScenarioId;
+  horizonDays: number;
+  generatedAt: string;
+  points: DemandForecastPoint[];
+  productForecasts: ProductDemandForecast[];
+  districtForecasts: DistrictDemandForecast[];
+  topProducts: Product[];
+  lowProducts: Product[];
+  accuracyMetrics: {
+    method: string;
+    maeKg: number;
+    mapePct: number;
+  };
+}
+
+// 2. Transportation Optimization (VRP)
+export interface RouteStop {
+  stopIndex: number;
+  type: 'pickup' | 'delivery';
+  entityId: string;
+  name: string;
+  location: string;
+  cropType: Product;
+  quantityKg: number;
+  distanceFromPrevKm: number;
+  lat: number;
+  lon: number;
+}
+
+export interface VehicleRoute {
+  routeId: string;
+  vehicleCapacityKg: number;
+  totalLoadKg: number;
+  utilizationPct: number;
+  totalDistanceKm: number;
+  estimatedFuelLiters: number;
+  estimatedCostRs: number;
+  stops: RouteStop[];
+}
+
+export interface TransportationOptimizationResponse {
+  scenarioId: ScenarioId;
+  baseline: {
+    singleLegsCount: number;
+    totalDistanceKm: number;
+    totalCostRs: number;
+  };
+  optimized: {
+    routes: VehicleRoute[];
+    totalDistanceKm: number;
+    totalCostRs: number;
+    distanceSavedKm: number;
+    costSavedRs: number;
+    efficiencyGainPct: number;
+  };
+}
+
+// 3. Freshness and Perishable Intelligence
+export type SpoilageRisk = 'Low' | 'Medium' | 'High' | 'Critical';
+
+export interface FreshnessItem {
+  cropId: string;
+  farmerName: string;
+  cropType: Product;
+  location: string;
+  harvestDate: string;
+  harvestAgeDays: number;
+  shelfLifeDays: number;
+  remainingShelfLifeDays: number;
+  freshnessScore: number; // 0-100
+  spoilageRisk: SpoilageRisk;
+  fefoRank: number;
+  warning: string | null;
+}
+
+export interface FreshnessIntelligenceResponse {
+  scenarioId: ScenarioId;
+  items: FreshnessItem[];
+  highRiskCount: number;
+  nearExpiryCount: number;
+  avgFreshnessScore: number;
+}
+
+// 4. Supply Risk Monitoring
+export interface DistrictRiskSummary {
+  district: string;
+  riskScore: number; // 0-100
+  riskCategory: 'Low' | 'Medium' | 'High' | 'Critical';
+  supplyKg: number;
+  demandKg: number;
+  shortageKg: number;
+  primaryDeficitCrop: Product | null;
+}
+
+export interface SupplyRiskResponse {
+  scenarioId: ScenarioId;
+  overallRiskCategory: 'Low' | 'Medium' | 'High' | 'Critical';
+  overallRiskScore: number;
+  districts: DistrictRiskSummary[];
+  alerts: Array<{
+    id: string;
+    level: 'info' | 'warning' | 'critical';
+    title: string;
+    description: string;
+    recommendedAction: string;
+  }>;
+}
+
+// 5. Intelligent Price Recommendation
+export interface PriceRecommendation {
+  cropType: Product;
+  marketPrice: number;
+  minRecordedPrice: number;
+  maxRecordedPrice: number;
+  recommendedSellingPrice: {
+    gradeA: number;
+    gradeB: number;
+    gradeC: number;
+  };
+  buyerMaxAverage: number;
+  fairPriceRange: { min: number; max: number };
+  estimatedTransportCostPerKg: number;
+  estimatedFarmerNetProceeds: number;
+  rationale: string;
+}
+
+export interface PriceRecommendationResponse {
+  scenarioId: ScenarioId;
+  recommendations: PriceRecommendation[];
+}
+
+// 6. What-If Decision Simulator
+export interface SimulationParameters {
+  supplyFactorPct?: number; // e.g. -20 for 20% reduction
+  demandFactorPct?: number; // e.g. +30 for 30% increase
+  transportRateFactorPct?: number; // e.g. +25 for fuel hike
+  blockedCorridors?: Array<{ from: string; to: string; reason: string }>;
+  disabledFarmerIds?: string[];
+}
+
+export interface SimulationResult {
+  baseline: {
+    totalSupplyKg: number;
+    totalDemandKg: number;
+    allocatedKg: number;
+    unfulfilledKg: number;
+    fillRate: number;
+    transportCostRs: number;
+    avgSuitability: number;
+    jainIndex: number;
+  };
+  simulated: {
+    totalSupplyKg: number;
+    totalDemandKg: number;
+    allocatedKg: number;
+    unfulfilledKg: number;
+    fillRate: number;
+    transportCostRs: number;
+    avgSuitability: number;
+    jainIndex: number;
+  };
+  impactDeltas: {
+    supplyChangeKg: number;
+    demandChangeKg: number;
+    allocatedChangeKg: number;
+    transportCostDeltaRs: number;
+    fillRateDeltaPct: number;
+  };
+  recommendations: string[];
+}
+
+// 7. Food Waste & Sustainability Analytics
+export interface SustainabilityResponse {
+  scenarioId: ScenarioId;
+  metrics: {
+    totalProduceAllocatedKg: number;
+    unallocatedProduceKg: number;
+    estimatedSpoilageAvoidedKg: number;
+    wasteAvoidancePct: number;
+    totalOptimizedDistanceKm: number;
+    distanceSavedKm: number;
+    estimatedCo2EmissionsKg: number;
+    co2EmissionsSavedKg: number;
+  };
+  assumptions: {
+    fuelEconomyKmPerL: number;
+    co2KgPerLiterDiesel: number;
+    baselineSpoilageRatePct: number;
+  };
+}
+
 export interface ApiErrorBody {
   error: {
     code: string;

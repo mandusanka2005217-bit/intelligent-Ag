@@ -22,6 +22,7 @@ import { useAuthStore } from '@/core/store/authStore';
 import type { CreateFarmerDto, Farmer, Order, Product, QualityGrade, UpdateFarmerDto } from '@contracts/types';
 import { formatCurrency, formatWeight, formatDate } from '@/shared/utils/format';
 import { Link } from 'react-router-dom';
+import { usePriceRecommendations, useFreshnessIntelligence, useDemandForecasting } from '@/features/intelligence/hooks/useIntelligence';
 
 const PRODUCTS: Product[] = [
   'Tomato',
@@ -69,6 +70,11 @@ export const FarmerDashboardView: React.FC = () => {
   // Orders received for this farmer
   const { data: allOrders = [], isLoading: ordersLoading } = useOrders();
   const updateOrderStatusMutation = useUpdateOrderStatus();
+
+  // Intelligence queries
+  const { data: priceRecs } = usePriceRecommendations('A');
+  const { data: freshnessData } = useFreshnessIntelligence('A');
+  const { data: forecastData } = useDemandForecasting('A', 30);
 
   // Filter listings belonging to this farmer (by username or matching name/location)
   const myListings = allFarmers.filter(
@@ -702,6 +708,62 @@ export const FarmerDashboardView: React.FC = () => {
               </table>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* SMART AGRICULTURAL INSIGHTS (AI RECOMMENDATIONS & HARVEST INTELLIGENCE) */}
+      <section className="card" style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #bbf7d0', background: '#f0fdf4' }}>
+        <div className="card__header" style={{ padding: '1.25rem 1.5rem', background: '#dcfce7', borderBottom: '1px solid #bbf7d0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Sparkles size={20} color="#15803d" />
+            <h3 className="card__title" style={{ fontSize: '1.1rem', color: '#166534', margin: 0 }}>
+              Smart Agricultural Insights & Recommendations
+            </h3>
+          </div>
+          <p className="card__subtitle" style={{ margin: '0.25rem 0 0 0', color: '#15803d', fontSize: '0.85rem' }}>
+            Data-driven pricing corridors, crop perishability indicators, and high-demand forecasts for your harvests
+          </p>
+        </div>
+
+        <div className="card__body" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Quick Cards Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+            {/* Price Recommendation Card */}
+            <div style={{ background: '#ffffff', borderRadius: '10px', padding: '1rem', border: '1px solid #dcfce7' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#15803d', fontWeight: 600, fontSize: '0.85rem' }}>
+                <DollarSign size={16} /> RECOMMENDED SELLING PRICES
+              </div>
+              <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.85rem' }}>
+                {priceRecs?.recommendations.slice(0, 3).map((rec: any) => (
+                  <div key={rec.cropType} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '3px' }}>
+                    <strong>{rec.cropType}</strong>
+                    <span style={{ color: '#166534', fontWeight: 600 }}>Grade A: Rs. {rec.recommendedSellingPrice.gradeA}/kg</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Freshness / Spoilage Alert */}
+            <div style={{ background: '#ffffff', borderRadius: '10px', padding: '1rem', border: '1px solid #dcfce7' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ea580c', fontWeight: 600, fontSize: '0.85rem' }}>
+                <Clock size={16} /> HARVEST PERISHABILITY NOTICE
+              </div>
+              <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+                Average freshness score across regional supply is <strong>{freshnessData?.avgFreshnessScore ?? 85}/100</strong>.
+                Tomatoes and Beans have ambient shelf-life under 8 days. Prioritize early delivery for optimal return.
+              </p>
+            </div>
+
+            {/* High Demand Signals */}
+            <div style={{ background: '#ffffff', borderRadius: '10px', padding: '1rem', border: '1px solid #dcfce7' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontWeight: 600, fontSize: '0.85rem' }}>
+                <TrendingUp size={16} /> MARKET DEMAND FORECAST
+              </div>
+              <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+                Strong buyer demand projected for <strong>{forecastData?.topProducts.slice(0, 3).join(', ') ?? 'Tomato, Beans, Carrot'}</strong> over the next 30 days. Listing these crops yields the fastest matching times.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 

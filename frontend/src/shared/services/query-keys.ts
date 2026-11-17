@@ -69,4 +69,20 @@ export const queryKeys = {
     allocationBreakdown: (scenarioId: ScenarioId) =>
       [...queryKeys.dashboard.all, 'allocation-breakdown', scenarioId] as const,
   },
+
+  intelligence: {
+    all: ['intelligence'] as const,
+    forecasting: (scenarioId: ScenarioId, horizon?: number) =>
+      [...queryKeys.intelligence.all, 'forecasting', scenarioId, horizon ?? 30] as const,
+    transportation: (scenarioId: ScenarioId) =>
+      [...queryKeys.intelligence.all, 'transportation', scenarioId] as const,
+    freshness: (scenarioId: ScenarioId) =>
+      [...queryKeys.intelligence.all, 'freshness', scenarioId] as const,
+    risk: (scenarioId: ScenarioId) =>
+      [...queryKeys.intelligence.all, 'risk', scenarioId] as const,
+    pricing: (scenarioId: ScenarioId) =>
+      [...queryKeys.intelligence.all, 'pricing', scenarioId] as const,
+    sustainability: (scenarioId: ScenarioId) =>
+      [...queryKeys.intelligence.all, 'sustainability', scenarioId] as const,
+  },
 } as const;

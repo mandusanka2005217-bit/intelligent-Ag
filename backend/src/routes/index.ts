@@ -11,6 +11,7 @@ import { createOrdersRouter } from './orders';
 import { createPricesRouter } from './prices';
 import { createScenariosRouter } from './scenarios';
 import { createUploadRouter } from './upload';
+import { createIntelligenceRouter } from './intelligence';
 
 export function createApiRouter(store: DataStore): Router {
   const router = Router();
@@ -45,5 +46,6 @@ export function createApiRouter(store: DataStore): Router {
   router.use('/compare', createCompareRouter(store));
   router.use('/prices', createPricesRouter(store));
   router.use('/dashboard', createDashboardRouter(store));
+  router.use('/intelligence', createIntelligenceRouter(store));
   return router;
 }

@@ -9,6 +9,7 @@ import { matchingRoutes } from './features/matching/routes';
 import { allocationRoutes } from './features/allocation/routes';
 import { strategyRoutes } from './features/strategies/routes';
 import { priceRoutes } from './features/prices/routes';
+import { intelligenceRoutes } from './features/intelligence/routes';
 import { useAuthStore } from './core/store/authStore';
 
 const IndexRedirect: React.FC = () => {
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
       ...allocationRoutes,
       ...strategyRoutes,
       ...priceRoutes,
+      ...intelligenceRoutes,
       {
         path: '*',
         element: <NotFoundPage />,
