@@ -1,83 +1,70 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { Buyer, BuyerFilters, CreateBuyerDto, UpdateBuyerDto } from '@contracts/types';
+import { useScenarioStore } from '@core/store/scenarioStore';
 import apiClient from '@/shared/services/api-client';
 import { queryKeys } from '@/shared/services/query-keys';
-import type { Buyer, CreateBuyerDto, UpdateBuyerDto, BuyerFilters } from '../types';
+import { invalidateScenarioDependents } from '@/shared/services/invalidate';
 
-// ---- API functions ----
-const fetchBuyers = async (filters?: BuyerFilters): Promise<Buyer[]> => {
-  const { data } = await apiClient.get<Buyer[]>('/buyers', { params: filters });
+async function fetchBuyers(scenarioId: string, filters?: BuyerFilters): Promise<Buyer[]> {
+  const { data } = await apiClient.get<Buyer[]>('/buyers', {
+    params: { scenarioId, ...filters },
+  });
   return data;
-};
+}
 
-const fetchBuyerById = async (id: number): Promise<Buyer> => {
-  const { data } = await apiClient.get<Buyer>(`/buyers/${id}`);
+async function createBuyer(scenarioId: string, dto: CreateBuyerDto): Promise<Buyer> {
+  const { data } = await apiClient.post<Buyer>('/buyers', { scenarioId, ...dto });
   return data;
-};
+}
 
-const createBuyerApi = async (dto: CreateBuyerDto): Promise<Buyer> => {
-  const { data } = await apiClient.post<Buyer>('/buyers', dto);
+async function updateBuyer(
+  scenarioId: string,
+  id: string,
+  dto: UpdateBuyerDto,
+): Promise<Buyer> {
+  const { data } = await apiClient.patch<Buyer>(`/buyers/${id}`, dto, {
+    params: { scenarioId },
+  });
   return data;
-};
+}
 
-const updateBuyerApi = async ({ id, dto }: { id: number; dto: UpdateBuyerDto }): Promise<Buyer> => {
-  const { data } = await apiClient.patch<Buyer>(`/buyers/${id}`, dto);
-  return data;
-};
+async function deleteBuyer(scenarioId: string, id: string): Promise<void> {
+  await apiClient.delete(`/buyers/${id}`, { params: { scenarioId } });
+}
 
-const deleteBuyerApi = async (id: number): Promise<void> => {
-  await apiClient.delete(`/buyers/${id}`);
-};
-
-// ---- Hooks ----
-
-/** List all buyers with optional filters */
 export function useBuyers(filters?: BuyerFilters) {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   return useQuery({
-    queryKey: queryKeys.buyers.list(filters),
-    queryFn: () => fetchBuyers(filters),
+    queryKey: queryKeys.buyers.list(scenarioId, filters),
+    queryFn: () => fetchBuyers(scenarioId, filters),
+    placeholderData: (previous) => previous,
   });
 }
 
-/** Fetch a single buyer by ID */
-export function useBuyer(id: number) {
-  return useQuery({
-    queryKey: queryKeys.buyers.detail(id),
-    queryFn: () => fetchBuyerById(id),
-    enabled: !!id,
-  });
-}
-
-/** Create a new buyer */
 export function useCreateBuyer() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (dto: CreateBuyerDto) => createBuyerApi(dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.buyers.all });
-    },
+    mutationFn: (dto: CreateBuyerDto) => createBuyer(scenarioId, dto),
+    onSuccess: () => invalidateScenarioDependents(queryClient, scenarioId),
   });
 }
 
-/** Update an existing buyer */
 export function useUpdateBuyer() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, dto }: { id: number; dto: UpdateBuyerDto }) =>
-      updateBuyerApi({ id, dto }),
-    onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.buyers.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.buyers.detail(id) });
-    },
+    mutationFn: ({ id, dto }: { id: string; dto: UpdateBuyerDto }) =>
+      updateBuyer(scenarioId, id, dto),
+    onSuccess: () => invalidateScenarioDependents(queryClient, scenarioId),
   });
 }
 
-/** Delete a buyer */
 export function useDeleteBuyer() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => deleteBuyerApi(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.buyers.all });
-    },
+    mutationFn: (id: string) => deleteBuyer(scenarioId, id),
+    onSuccess: () => invalidateScenarioDependents(queryClient, scenarioId),
   });
 }

@@ -1,34 +1,27 @@
 import { useQuery } from '@tanstack/react-query';
+import type { AllocationResponse } from '@contracts/types';
+import { useScenarioStore } from '@core/store/scenarioStore';
 import apiClient from '@/shared/services/api-client';
 import { queryKeys } from '@/shared/services/query-keys';
-import type { Allocation, AllocationFilters } from '../types';
 
-// ---- API functions ----
-const fetchAllocations = async (filters?: AllocationFilters): Promise<Allocation[]> => {
-  const { data } = await apiClient.get<Allocation[]>('/allocations', { params: filters });
-  return data;
-};
+/**
+ * The allocation request is a read-only computation; it lives in TanStack Query
+ * so switching tabs or components reuses the same cached response.
+ */
+export function useAllocation() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
+  const weights = useScenarioStore((state) => state.weights);
+  const strategy = useScenarioStore((state) => state.strategy);
+  const shortagePolicy = useScenarioStore((state) => state.shortagePolicy);
 
-const fetchAllocationById = async (id: number): Promise<Allocation> => {
-  const { data } = await apiClient.get<Allocation>(`/allocations/${id}`);
-  return data;
-};
+  const params = { scenarioId, weights, strategy, shortagePolicy };
 
-// ---- Hooks ----
-
-/** List all allocations */
-export function useAllocations(filters?: AllocationFilters) {
   return useQuery({
-    queryKey: queryKeys.allocations.list(filters),
-    queryFn: () => fetchAllocations(filters),
-  });
-}
-
-/** Get a single allocation by ID */
-export function useAllocation(id: number) {
-  return useQuery({
-    queryKey: queryKeys.allocations.detail(id),
-    queryFn: () => fetchAllocationById(id),
-    enabled: !!id,
+    queryKey: queryKeys.allocations.compute(params),
+    queryFn: async () => {
+      const { data } = await apiClient.post<AllocationResponse>('/allocate', params);
+      return data;
+    },
+    placeholderData: (previous) => previous,
   });
 }

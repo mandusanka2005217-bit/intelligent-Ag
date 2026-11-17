@@ -1,40 +1,13 @@
-// Farmer feature TypeScript type definitions
-
-export interface Farmer {
-  id: number;
-  name: string;
-  location: string;
-  cropType: string;
-  quantityKg: number;
-  pricePerKg: number;
-  createdAt: string; // ISO 8601 date string
-}
-
-export interface CreateFarmerDto {
-  name: string;
-  location: string;
-  cropType: string;
-  quantityKg: number;
-  pricePerKg: number;
-}
-
-export interface UpdateFarmerDto {
-  name?: string;
-  location?: string;
-  cropType?: string;
-  quantityKg?: number;
-  pricePerKg?: number;
-}
-
-export interface FarmerFilters {
-  search?: string;
-  cropType?: string;
-  minPricePerKg?: number;
-  maxPricePerKg?: number;
-}
+// Farmer feature types. The single source of truth is contracts/types.ts.
+export type {
+  Farmer,
+  CreateFarmerDto,
+  UpdateFarmerDto,
+  FarmerFilters,
+} from '@contracts/types';
 
 export interface PaginatedFarmers {
-  data: Farmer[];
+  data: import('@contracts/types').Farmer[];
   total: number;
   page: number;
   pageSize: number;

@@ -1,0 +1,27 @@
+{
+  "name": "intelligent-agricultural-supply",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Intelligent agricultural supply and demand coordination with matching, scoring and allocation",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c green,cyan \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "start": "npm run start -w backend",
+    "test": "npm run test -w backend",
+    "test:watch": "npm run test:watch -w backend",
+    "validate": "npm run validate -w backend",
+    "generate:data": "npm run generate:data -w backend",
+    "lint": "npm run lint -w frontend",
+    "type-check": "npm run type-check -w frontend && npm run type-check -w backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,9 +1,11 @@
+import { createElement, lazy } from 'react';
 import type { RouteObject } from 'react-router-dom';
-import AllocationPage from './views/AllocationPage';
+
+const AllocationPage = lazy(() => import('./views/AllocationPage'));
 
 export const allocationRoutes: RouteObject[] = [
   {
     path: 'allocation',
-    element: <AllocationPage />,
+    element: createElement(AllocationPage),
   },
 ];

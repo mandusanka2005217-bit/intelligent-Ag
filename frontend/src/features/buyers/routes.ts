@@ -1,9 +1,11 @@
+import { createElement, lazy } from 'react';
 import type { RouteObject } from 'react-router-dom';
-import BuyersPage from './views/BuyersPage';
+
+const BuyersPage = lazy(() => import('./views/BuyersPage'));
 
 export const buyerRoutes: RouteObject[] = [
   {
     path: 'buyers',
-    element: <BuyersPage />,
+    element: createElement(BuyersPage),
   },
 ];

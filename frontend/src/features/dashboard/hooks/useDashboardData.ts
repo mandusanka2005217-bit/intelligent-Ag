@@ -1,82 +1,53 @@
 import { useQuery } from '@tanstack/react-query';
+import type {
+  AllocationBreakdownItem,
+  DashboardStats,
+  DistancePricePoint,
+  ScoreDistributionBucket,
+} from '@contracts/types';
+import { useScenarioStore } from '@core/store/scenarioStore';
 import apiClient from '@/shared/services/api-client';
 import { queryKeys } from '@/shared/services/query-keys';
 
-// ---- Dashboard data types ----
-export interface DashboardStats {
-  totalFarmers: number;
-  totalBuyers: number;
-  totalMatches: number;
-  avgSuitabilityScore: number;
-  totalAllocatedKg: number;
-  avgUtilizationPct: number;
+async function fetchDashboard<T>(path: string, scenarioId: string): Promise<T> {
+  const { data } = await apiClient.get<T>(path, { params: { scenarioId } });
+  return data;
 }
 
-export interface ScoreDistributionBucket {
-  range: string;   // e.g. "0-10", "10-20", ...
-  count: number;
-}
-
-export interface DistancePricePoint {
-  farmerId: number;
-  farmerName: string;
-  distanceKm: number;
-  pricePerKg: number;
-  cropType: string;
-}
-
-export interface AllocationBreakdownItem {
-  name: string;   // crop type or match label
-  value: number;  // allocated kg
-}
-
-// ---- API functions ----
-const fetchDashboardStats = async (): Promise<DashboardStats> => {
-  const { data } = await apiClient.get<DashboardStats>('/dashboard/stats');
-  return data;
-};
-
-const fetchScoreDistribution = async (): Promise<ScoreDistributionBucket[]> => {
-  const { data } = await apiClient.get<ScoreDistributionBucket[]>('/dashboard/score-distribution');
-  return data;
-};
-
-const fetchDistancePrice = async (): Promise<DistancePricePoint[]> => {
-  const { data } = await apiClient.get<DistancePricePoint[]>('/dashboard/distance-price');
-  return data;
-};
-
-const fetchAllocationBreakdown = async (): Promise<AllocationBreakdownItem[]> => {
-  const { data } = await apiClient.get<AllocationBreakdownItem[]>('/dashboard/allocation-breakdown');
-  return data;
-};
-
-// ---- Hooks ----
-
+/** Headline scenario KPIs. */
 export function useDashboardStats() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   return useQuery({
-    queryKey: queryKeys.dashboard.stats(),
-    queryFn: fetchDashboardStats,
+    queryKey: queryKeys.dashboard.stats(scenarioId),
+    queryFn: () => fetchDashboard<DashboardStats>('/dashboard/stats', scenarioId),
+    placeholderData: (previous) => previous,
   });
 }
 
 export function useScoreDistribution() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   return useQuery({
-    queryKey: queryKeys.dashboard.scoreDistribution(),
-    queryFn: fetchScoreDistribution,
+    queryKey: queryKeys.dashboard.scoreDistribution(scenarioId),
+    queryFn: () => fetchDashboard<ScoreDistributionBucket[]>('/dashboard/score-distribution', scenarioId),
+    placeholderData: (previous) => previous,
   });
 }
 
 export function useDistancePriceData() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   return useQuery({
-    queryKey: queryKeys.dashboard.distancePrice(),
-    queryFn: fetchDistancePrice,
+    queryKey: queryKeys.dashboard.distancePrice(scenarioId),
+    queryFn: () => fetchDashboard<DistancePricePoint[]>('/dashboard/distance-price', scenarioId),
+    placeholderData: (previous) => previous,
   });
 }
 
 export function useAllocationBreakdown() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   return useQuery({
-    queryKey: queryKeys.dashboard.allocationBreakdown(),
-    queryFn: fetchAllocationBreakdown,
+    queryKey: queryKeys.dashboard.allocationBreakdown(scenarioId),
+    queryFn: () =>
+      fetchDashboard<AllocationBreakdownItem[]>('/dashboard/allocation-breakdown', scenarioId),
+    placeholderData: (previous) => previous,
   });
 }

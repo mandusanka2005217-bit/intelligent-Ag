@@ -1,0 +1,18 @@
+{
+  "maxDistanceKm": 250,
+  "maxDeliveryDelayDays": 7,
+  "roadCircuity": 1.3,
+  "transportRatePerKgKm": 0.012,
+  "scoreValuePerKg": 20,
+  "qualityScores": {
+    "A": 100,
+    "B": 75,
+    "C": 50
+  },
+  "anomaly": {
+    "windowDays": 14,
+    "thresholdZ": 3,
+    "robustWindowDays": 30,
+    "priceWeightCap": 0.5
+  }
+}

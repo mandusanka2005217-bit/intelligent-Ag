@@ -1,11 +1,18 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppLayout from './core/layouts/AppLayout';
-import DashboardPage from './features/dashboard/views/DashboardPage';
-import FarmersPage from './features/farmers/views/FarmersPage';
-import BuyersPage from './features/buyers/views/BuyersPage';
-import MatchingPage from './features/matching/views/MatchingPage';
-import AllocationPage from './features/allocation/views/AllocationPage';
+import NotFoundPage from './core/layouts/NotFoundPage';
+import { dashboardRoutes } from './features/dashboard/routes';
+import { farmerRoutes } from './features/farmers/routes';
+import { buyerRoutes } from './features/buyers/routes';
+import { matchingRoutes } from './features/matching/routes';
+import { allocationRoutes } from './features/allocation/routes';
+import { strategyRoutes } from './features/strategies/routes';
+import { priceRoutes } from './features/prices/routes';
 
+/**
+ * Route aggregation. Each feature owns its own `routes.ts`; this file only
+ * composes them under the shared layout. Elements are lazy-loaded per feature.
+ */
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -15,25 +22,16 @@ export const router = createBrowserRouter([
         index: true,
         element: <Navigate to="/dashboard" replace />,
       },
+      ...dashboardRoutes,
+      ...farmerRoutes,
+      ...buyerRoutes,
+      ...matchingRoutes,
+      ...allocationRoutes,
+      ...strategyRoutes,
+      ...priceRoutes,
       {
-        path: 'dashboard',
-        element: <DashboardPage />,
-      },
-      {
-        path: 'farmers',
-        element: <FarmersPage />,
-      },
-      {
-        path: 'buyers',
-        element: <BuyersPage />,
-      },
-      {
-        path: 'matching',
-        element: <MatchingPage />,
-      },
-      {
-        path: 'allocation',
-        element: <AllocationPage />,
+        path: '*',
+        element: <NotFoundPage />,
       },
     ],
   },

@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
+import type { CreateFarmerDto, Farmer } from '@contracts/types';
 import Button from '@/core/components/Button';
-import type { Farmer, CreateFarmerDto } from '../types';
+import { DEMO_TODAY, PRODUCTS, QUALITY_GRADES, QUALITY_LABELS } from '@/shared/constants';
 
 interface FarmerFormProps {
   initialValues?: Partial<Farmer>;
+  locations: string[];
   onSubmit: (data: CreateFarmerDto) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
 
-const CROP_TYPES = ['Rice', 'Maize', 'Wheat', 'Tomato', 'Potato', 'Onion', 'Chili', 'Coconut', 'Tea', 'Rubber', 'Other'];
-
 const FarmerForm: React.FC<FarmerFormProps> = ({
   initialValues,
+  locations,
   onSubmit,
   onCancel,
   isSubmitting = false,
@@ -21,100 +22,179 @@ const FarmerForm: React.FC<FarmerFormProps> = ({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<CreateFarmerDto>({
     defaultValues: {
       name: initialValues?.name ?? '',
-      location: initialValues?.location ?? '',
-      cropType: initialValues?.cropType ?? '',
-      quantityKg: initialValues?.quantityKg ?? 0,
-      pricePerKg: initialValues?.pricePerKg ?? 0,
+      location: initialValues?.location ?? locations[0] ?? '',
+      cropType: initialValues?.cropType ?? 'Tomato',
+      quantityKg: initialValues?.quantityKg ?? 500,
+      pricePerKg: initialValues?.pricePerKg ?? 100,
+      minPricePerKg:
+        initialValues?.minPricePerKg ?? Math.round((initialValues?.pricePerKg ?? 100) * 0.85),
+      qualityGrade: initialValues?.qualityGrade ?? 'B',
+      availableFrom: initialValues?.availableFrom ?? DEMO_TODAY,
     },
   });
 
+  const pricePerKg = watch('pricePerKg');
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      {/* Name */}
-      <div className="form-group">
-        <label className="form-label" htmlFor="farmer-name">Full Name *</label>
-        <input
-          id="farmer-name"
-          className="form-input"
-          type="text"
-          placeholder="e.g. Sunil Perera"
-          {...register('name', { required: 'Name is required', minLength: { value: 2, message: 'At least 2 characters' } })}
-        />
-        {errors.name && <span className="form-error">{errors.name.message}</span>}
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label" htmlFor="farmer-name">
+            Full name *
+          </label>
+          <input
+            id="farmer-name"
+            className="form-input"
+            type="text"
+            autoComplete="name"
+            placeholder="e.g. Sunil Perera"
+            {...register('name', {
+              required: 'Name is required',
+              minLength: { value: 2, message: 'At least 2 characters' },
+            })}
+          />
+          {errors.name && <span className="form-error">{errors.name.message}</span>}
+        </div>
+
+        <div className="form-group">
+          <label className="form-label" htmlFor="farmer-location">
+            Town *
+          </label>
+          <select
+            id="farmer-location"
+            className="form-select"
+            {...register('location', { required: 'Location is required' })}
+          >
+            <option value="">Select town…</option>
+            {locations.map((town) => (
+              <option key={town} value={town}>
+                {town}
+              </option>
+            ))}
+          </select>
+          {errors.location && <span className="form-error">{errors.location.message}</span>}
+        </div>
       </div>
 
-      {/* Location */}
-      <div className="form-group">
-        <label className="form-label" htmlFor="farmer-location">Location *</label>
-        <input
-          id="farmer-location"
-          className="form-input"
-          type="text"
-          placeholder="e.g. Kurunegala"
-          {...register('location', { required: 'Location is required' })}
-        />
-        {errors.location && <span className="form-error">{errors.location.message}</span>}
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label" htmlFor="farmer-crop">
+            Crop *
+          </label>
+          <select
+            id="farmer-crop"
+            className="form-select"
+            {...register('cropType', { required: 'Crop type is required' })}
+          >
+            {PRODUCTS.map((product) => (
+              <option key={product} value={product}>
+                {product}
+              </option>
+            ))}
+          </select>
+          {errors.cropType && <span className="form-error">{errors.cropType.message}</span>}
+        </div>
+
+        <div className="form-group">
+          <label className="form-label" htmlFor="farmer-quality">
+            Quality grade
+          </label>
+          <select id="farmer-quality" className="form-select" {...register('qualityGrade')}>
+            {QUALITY_GRADES.map((grade) => (
+              <option key={grade} value={grade}>
+                {QUALITY_LABELS[grade]}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Crop Type */}
-      <div className="form-group">
-        <label className="form-label" htmlFor="farmer-crop">Crop Type *</label>
-        <select
-          id="farmer-crop"
-          className="form-select"
-          {...register('cropType', { required: 'Crop type is required' })}
-        >
-          <option value="">Select crop type...</option>
-          {CROP_TYPES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-        {errors.cropType && <span className="form-error">{errors.cropType.message}</span>}
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label" htmlFor="farmer-qty">
+            Available quantity (kg) *
+          </label>
+          <input
+            id="farmer-qty"
+            className="form-input"
+            type="number"
+            min={1}
+            step={1}
+            {...register('quantityKg', {
+              required: 'Quantity is required',
+              min: { value: 1, message: 'Must be at least 1 kg' },
+              valueAsNumber: true,
+            })}
+          />
+          {errors.quantityKg && <span className="form-error">{errors.quantityKg.message}</span>}
+        </div>
+
+        <div className="form-group">
+          <label className="form-label" htmlFor="farmer-available">
+            Available from
+          </label>
+          <input
+            id="farmer-available"
+            className="form-input"
+            type="date"
+            {...register('availableFrom', { required: 'Availability date is required' })}
+          />
+          {errors.availableFrom && <span className="form-error">{errors.availableFrom.message}</span>}
+        </div>
       </div>
 
-      {/* Quantity */}
-      <div className="form-group">
-        <label className="form-label" htmlFor="farmer-qty">Available Quantity (kg) *</label>
-        <input
-          id="farmer-qty"
-          className="form-input"
-          type="number"
-          min={1}
-          placeholder="e.g. 500"
-          {...register('quantityKg', {
-            required: 'Quantity is required',
-            min: { value: 1, message: 'Must be at least 1 kg' },
-            valueAsNumber: true,
-          })}
-        />
-        {errors.quantityKg && <span className="form-error">{errors.quantityKg.message}</span>}
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label" htmlFor="farmer-price">
+            Asking price (Rs/kg) *
+          </label>
+          <input
+            id="farmer-price"
+            className="form-input"
+            type="number"
+            min={0.01}
+            step={0.01}
+            {...register('pricePerKg', {
+              required: 'Price is required',
+              min: { value: 0.01, message: 'Price must be positive' },
+              valueAsNumber: true,
+            })}
+          />
+          {errors.pricePerKg && <span className="form-error">{errors.pricePerKg.message}</span>}
+        </div>
+
+        <div className="form-group">
+          <label className="form-label" htmlFor="farmer-min-price">
+            Minimum acceptable (Rs/kg)
+          </label>
+          <input
+            id="farmer-min-price"
+            className="form-input"
+            type="number"
+            min={0.01}
+            step={0.01}
+            {...register('minPricePerKg', {
+              valueAsNumber: true,
+              validate: (value) =>
+                value === undefined ||
+                Number.isNaN(value) ||
+                value <= pricePerKg ||
+                'Minimum price cannot exceed the asking price',
+            })}
+          />
+          {errors.minPricePerKg && (
+            <span className="form-error">{errors.minPricePerKg.message}</span>
+          )}
+          <span className="form-help">Defaults to 85% of the asking price.</span>
+        </div>
       </div>
 
-      {/* Price per kg */}
-      <div className="form-group">
-        <label className="form-label" htmlFor="farmer-price">Price per kg (LKR) *</label>
-        <input
-          id="farmer-price"
-          className="form-input"
-          type="number"
-          min={0.01}
-          step={0.01}
-          placeholder="e.g. 85.00"
-          {...register('pricePerKg', {
-            required: 'Price is required',
-            min: { value: 0.01, message: 'Price must be positive' },
-            valueAsNumber: true,
-          })}
-        />
-        {errors.pricePerKg && <span className="form-error">{errors.pricePerKg.message}</span>}
-      </div>
-
-      {/* Actions */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+      <div className="form-actions">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>

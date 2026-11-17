@@ -1,9 +1,11 @@
+import { createElement, lazy } from 'react';
 import type { RouteObject } from 'react-router-dom';
-import DashboardPage from './views/DashboardPage';
+
+const DashboardPage = lazy(() => import('./views/DashboardPage'));
 
 export const dashboardRoutes: RouteObject[] = [
   {
     path: 'dashboard',
-    element: <DashboardPage />,
+    element: createElement(DashboardPage),
   },
 ];

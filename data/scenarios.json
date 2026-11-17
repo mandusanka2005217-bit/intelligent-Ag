@@ -1,0 +1,32 @@
+[
+  {
+    "id": "A",
+    "name": "Normal season",
+    "description": "Typical November harvest. Supply roughly covers demand; a few products have small surpluses.",
+    "disruption": {
+      "supplyFactor": 1,
+      "blockedCorridors": [],
+      "priceSpike": null
+    }
+  },
+  {
+    "id": "B",
+    "name": "Disrupted / shortage",
+    "description": "Heavy rain cuts supply ~40%, the Badulla-Colombo corridor is closed, and tomato prices spike. Allocation, unmet demand and strategy differences become visible.",
+    "disruption": {
+      "supplyFactor": 0.6,
+      "blockedCorridors": [
+        {
+          "from": "Badulla",
+          "to": "Colombo",
+          "reason": "A5 landslide - road closed (SIMULATED)"
+        }
+      ],
+      "priceSpike": {
+        "product": "Tomato",
+        "date": "2026-11-14",
+        "pct": 0.45
+      }
+    }
+  }
+]

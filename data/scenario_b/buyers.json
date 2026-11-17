@@ -1,0 +1,98 @@
+[
+  {
+    "id": "B01",
+    "name": "Colombo Fresh Mart",
+    "requiredCropType": "Tomato",
+    "location": "Colombo",
+    "requiredQuantityKg": 2000,
+    "maxPricePerKg": 130,
+    "minAcceptableQuantityKg": 200,
+    "minQualityGrade": "B",
+    "requiredFrom": "2026-11-18",
+    "createdAt": "2026-10-01T08:00:00.000Z"
+  },
+  {
+    "id": "B02",
+    "name": "Cinnamon Grand Hotel",
+    "requiredCropType": "Tomato",
+    "location": "Colombo",
+    "requiredQuantityKg": 1200,
+    "maxPricePerKg": 138,
+    "minAcceptableQuantityKg": 100,
+    "minQualityGrade": "A",
+    "requiredFrom": "2026-11-18",
+    "createdAt": "2026-10-01T09:15:00.000Z"
+  },
+  {
+    "id": "B03",
+    "name": "Kandy Agro Processors",
+    "requiredCropType": "Carrot",
+    "location": "Kandy",
+    "requiredQuantityKg": 1600,
+    "maxPricePerKg": 110,
+    "minAcceptableQuantityKg": 250,
+    "minQualityGrade": "B",
+    "requiredFrom": "2026-11-18",
+    "createdAt": "2026-10-01T10:30:00.000Z"
+  },
+  {
+    "id": "B04",
+    "name": "Dambulla Wholesale Hub",
+    "requiredCropType": "Cabbage",
+    "location": "Dambulla",
+    "requiredQuantityKg": 2600,
+    "maxPricePerKg": 82,
+    "minAcceptableQuantityKg": 300,
+    "minQualityGrade": "C",
+    "requiredFrom": "2026-11-20",
+    "createdAt": "2026-10-01T11:00:00.000Z"
+  },
+  {
+    "id": "B05",
+    "name": "Katunayake Exporters",
+    "requiredCropType": "Beans",
+    "location": "Katunayake",
+    "requiredQuantityKg": 1100,
+    "maxPricePerKg": 175,
+    "minAcceptableQuantityKg": 150,
+    "minQualityGrade": "A",
+    "requiredFrom": "2026-11-17",
+    "createdAt": "2026-10-01T13:20:00.000Z"
+  },
+  {
+    "id": "B06",
+    "name": "Dambulla Onion Traders",
+    "requiredCropType": "Onion",
+    "location": "Dambulla",
+    "requiredQuantityKg": 3000,
+    "maxPricePerKg": 118,
+    "minAcceptableQuantityKg": 250,
+    "minQualityGrade": "B",
+    "requiredFrom": "2026-11-19",
+    "createdAt": "2026-10-01T14:10:00.000Z"
+  },
+  {
+    "id": "B07",
+    "name": "Keells Super - Colombo",
+    "requiredCropType": "Potato",
+    "location": "Colombo",
+    "requiredQuantityKg": 2200,
+    "maxPricePerKg": 88,
+    "minAcceptableQuantityKg": 200,
+    "minQualityGrade": "B",
+    "requiredFrom": "2026-11-20",
+    "createdAt": "2026-10-01T15:00:00.000Z"
+  },
+  {
+    "id": "B08",
+    "name": "Galle Fort Hotel",
+    "requiredCropType": "Potato",
+    "location": "Galle",
+    "requiredQuantityKg": 1800,
+    "maxPricePerKg": 92,
+    "minAcceptableQuantityKg": 150,
+    "minQualityGrade": "B",
+    "requiredFrom": "2026-11-18",
+    "createdAt": "2026-10-01T16:45:00.000Z"
+  }
+]

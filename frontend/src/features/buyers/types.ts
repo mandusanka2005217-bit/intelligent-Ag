@@ -1,39 +1,13 @@
-// Buyer feature TypeScript type definitions
-
-export interface Buyer {
-  id: number;
-  name: string;
-  location: string;
-  requiredCropType: string;
-  requiredQuantityKg: number;
-  maxPricePerKg: number;
-  createdAt: string; // ISO 8601 date string
-}
-
-export interface CreateBuyerDto {
-  name: string;
-  location: string;
-  requiredCropType: string;
-  requiredQuantityKg: number;
-  maxPricePerKg: number;
-}
-
-export interface UpdateBuyerDto {
-  name?: string;
-  location?: string;
-  requiredCropType?: string;
-  requiredQuantityKg?: number;
-  maxPricePerKg?: number;
-}
-
-export interface BuyerFilters {
-  search?: string;
-  requiredCropType?: string;
-  maxPricePerKg?: number;
-}
+// Buyer feature types. The single source of truth is contracts/types.ts.
+export type {
+  Buyer,
+  CreateBuyerDto,
+  UpdateBuyerDto,
+  BuyerFilters,
+} from '@contracts/types';
 
 export interface PaginatedBuyers {
-  data: Buyer[];
+  data: import('@contracts/types').Buyer[];
   total: number;
   page: number;
   pageSize: number;

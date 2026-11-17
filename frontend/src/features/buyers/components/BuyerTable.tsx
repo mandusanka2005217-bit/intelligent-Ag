@@ -1,15 +1,16 @@
 import React from 'react';
-import { Trash2, Edit } from 'lucide-react';
-import DataTable, { ColumnDef } from '@/shared/components/DataTable';
+import { Edit, Trash2 } from 'lucide-react';
+import type { Buyer } from '@contracts/types';
+import DataTable, { type ColumnDef } from '@/shared/components/DataTable';
 import Button from '@/core/components/Button';
-import { formatWeight, formatCurrency, formatDate } from '@/shared/utils/format';
-import type { Buyer } from '../types';
+import { formatCurrency, formatDate, formatWeight } from '@/shared/utils/format';
 
 interface BuyerTableProps {
   buyers: Buyer[];
   isLoading?: boolean;
   onEdit?: (buyer: Buyer) => void;
   onDelete?: (buyer: Buyer) => void;
+  onSelect?: (buyer: Buyer) => void;
 }
 
 const BuyerTable: React.FC<BuyerTableProps> = ({
@@ -17,64 +18,72 @@ const BuyerTable: React.FC<BuyerTableProps> = ({
   isLoading = false,
   onEdit,
   onDelete,
+  onSelect,
 }) => {
   const columns: ColumnDef<Buyer>[] = [
     {
       key: 'name',
-      header: 'Name / Company',
-      accessor: (row) => <span style={{ fontWeight: 500 }}>{row.name}</span>,
+      header: 'Buyer',
+      accessor: (row) => (
+        <div className="cell-stack">
+          <span className="cell-primary">{row.name}</span>
+          <span className="cell-sub">{row.id}</span>
+        </div>
+      ),
     },
-    {
-      key: 'location',
-      header: 'Location',
-      accessor: (row) => row.location,
-    },
+    { key: 'location', header: 'Town', accessor: (row) => row.location },
     {
       key: 'requiredCropType',
-      header: 'Required Crop',
-      accessor: (row) => (
-        <span
-          style={{
-            background: '#fde8cc',
-            color: '#92400e',
-            borderRadius: '9999px',
-            padding: '2px 10px',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-          }}
-        >
-          {row.requiredCropType}
-        </span>
-      ),
+      header: 'Needs',
+      accessor: (row) => <span className="chip chip--crop">{row.requiredCropType}</span>,
     },
     {
       key: 'requiredQuantityKg',
-      header: 'Required Qty',
+      header: 'Required',
       accessor: (row) => formatWeight(row.requiredQuantityKg),
       align: 'right',
     },
     {
       key: 'maxPricePerKg',
-      header: 'Max Price / kg',
-      accessor: (row) => formatCurrency(row.maxPricePerKg),
+      header: 'Ceiling / kg',
+      accessor: (row) => (
+        <div className="cell-stack cell-stack--right">
+          <span className="cell-primary">{formatCurrency(row.maxPricePerKg)}</span>
+          <span className="cell-sub">min lot {formatWeight(row.minAcceptableQuantityKg)}</span>
+        </div>
+      ),
       align: 'right',
     },
     {
-      key: 'createdAt',
-      header: 'Registered',
-      accessor: (row) => formatDate(row.createdAt),
+      key: 'minQualityGrade',
+      header: 'Min grade',
+      accessor: (row) => (
+        <span className={`grade grade--${row.minQualityGrade.toLowerCase()}`}>
+          {row.minQualityGrade}
+        </span>
+      ),
+      align: 'center',
+    },
+    {
+      key: 'requiredFrom',
+      header: 'Needed by',
+      accessor: (row) => formatDate(row.requiredFrom),
     },
     {
       key: 'actions',
       header: '',
       accessor: (row) => (
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+        <div className="table-actions">
           {onEdit && (
             <Button
               variant="ghost"
               size="sm"
               leftIcon={<Edit size={14} />}
-              onClick={(e) => { e.stopPropagation(); onEdit(row); }}
+              aria-label={`Edit ${row.name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onEdit(row);
+              }}
             >
               Edit
             </Button>
@@ -84,8 +93,12 @@ const BuyerTable: React.FC<BuyerTableProps> = ({
               variant="ghost"
               size="sm"
               leftIcon={<Trash2 size={14} />}
-              onClick={(e) => { e.stopPropagation(); onDelete(row); }}
-              style={{ color: 'var(--color-danger)' }}
+              className="btn--danger-text"
+              aria-label={`Delete ${row.name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete(row);
+              }}
             >
               Delete
             </Button>
@@ -97,13 +110,14 @@ const BuyerTable: React.FC<BuyerTableProps> = ({
   ];
 
   return (
-    <div className="card">
+    <div className="card card--table">
       <DataTable<Buyer>
         data={buyers}
         columns={columns}
         keyExtractor={(row) => row.id}
         isLoading={isLoading}
-        emptyMessage="No buyers found. Add your first buyer to get started."
+        onRowClick={onSelect}
+        emptyMessage="No buyers match this filter. Add a buyer or clear the filters."
       />
     </div>
   );

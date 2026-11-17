@@ -1,27 +1,20 @@
-// Matching feature TypeScript type definitions
-import type { Farmer } from '../farmers/types';
-import type { Buyer } from '../buyers/types';
-
-export interface Match {
-  id: number;
-  farmer: Farmer;
-  buyer: Buyer;
-  suitabilityScore: number;   // 0–100 overall score
-  distanceScore: number;      // 0–100
-  priceScore: number;         // 0–100
-  cropScore: number;          // 0–100
-  quantityScore: number;      // 0–100
-  reasons: string[];          // Human-readable match reasons
-  createdAt: string;          // ISO 8601 date string
-}
-
-export interface RunMatchingResult {
-  matchesCreated: number;
-  matches: Match[];
-}
+// Match feature types. The single source of truth is contracts/types.ts.
+export type {
+  Match,
+  MatchesResponse,
+  MatchRequest,
+  ScoreComponents,
+  AnomalyInfo,
+  WeightVector,
+} from '@contracts/types';
 
 export interface MatchFilters {
-  farmerId?: number;
-  buyerId?: number;
   minScore?: number;
+  limit?: number;
+}
+
+/** Kept for compatibility with the original stub. */
+export interface RunMatchingResult {
+  matchesCreated: number;
+  matches: import('@contracts/types').Match[];
 }

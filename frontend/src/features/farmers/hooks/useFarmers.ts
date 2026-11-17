@@ -1,83 +1,74 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { CreateFarmerDto, Farmer, FarmerFilters, UpdateFarmerDto } from '@contracts/types';
+import { useScenarioStore } from '@core/store/scenarioStore';
 import apiClient from '@/shared/services/api-client';
 import { queryKeys } from '@/shared/services/query-keys';
-import type { Farmer, CreateFarmerDto, UpdateFarmerDto, FarmerFilters } from '../types';
+import { invalidateScenarioDependents } from '@/shared/services/invalidate';
 
-// ---- API functions ----
-const fetchFarmers = async (filters?: FarmerFilters): Promise<Farmer[]> => {
-  const { data } = await apiClient.get<Farmer[]>('/farmers', { params: filters });
+async function fetchFarmers(
+  scenarioId: string,
+  filters?: FarmerFilters,
+): Promise<Farmer[]> {
+  const { data } = await apiClient.get<Farmer[]>('/farmers', {
+    params: { scenarioId, ...filters },
+  });
   return data;
-};
+}
 
-const fetchFarmerById = async (id: number): Promise<Farmer> => {
-  const { data } = await apiClient.get<Farmer>(`/farmers/${id}`);
+async function createFarmer(scenarioId: string, dto: CreateFarmerDto): Promise<Farmer> {
+  const { data } = await apiClient.post<Farmer>('/farmers', { scenarioId, ...dto });
   return data;
-};
+}
 
-const createFarmerApi = async (dto: CreateFarmerDto): Promise<Farmer> => {
-  const { data } = await apiClient.post<Farmer>('/farmers', dto);
+async function updateFarmer(
+  scenarioId: string,
+  id: string,
+  dto: UpdateFarmerDto,
+): Promise<Farmer> {
+  const { data } = await apiClient.patch<Farmer>(`/farmers/${id}`, dto, {
+    params: { scenarioId },
+  });
   return data;
-};
+}
 
-const updateFarmerApi = async ({ id, dto }: { id: number; dto: UpdateFarmerDto }): Promise<Farmer> => {
-  const { data } = await apiClient.patch<Farmer>(`/farmers/${id}`, dto);
-  return data;
-};
+async function deleteFarmer(scenarioId: string, id: string): Promise<void> {
+  await apiClient.delete(`/farmers/${id}`, { params: { scenarioId } });
+}
 
-const deleteFarmerApi = async (id: number): Promise<void> => {
-  await apiClient.delete(`/farmers/${id}`);
-};
-
-// ---- Hooks ----
-
-/** List all farmers with optional filters */
+/** List farmers for the active scenario with optional filters. */
 export function useFarmers(filters?: FarmerFilters) {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   return useQuery({
-    queryKey: queryKeys.farmers.list(filters),
-    queryFn: () => fetchFarmers(filters),
+    queryKey: queryKeys.farmers.list(scenarioId, filters),
+    queryFn: () => fetchFarmers(scenarioId, filters),
+    placeholderData: (previous) => previous,
   });
 }
 
-/** Fetch a single farmer by ID */
-export function useFarmer(id: number) {
-  return useQuery({
-    queryKey: queryKeys.farmers.detail(id),
-    queryFn: () => fetchFarmerById(id),
-    enabled: !!id,
-  });
-}
-
-/** Create a new farmer */
 export function useCreateFarmer() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (dto: CreateFarmerDto) => createFarmerApi(dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.farmers.all });
-    },
+    mutationFn: (dto: CreateFarmerDto) => createFarmer(scenarioId, dto),
+    onSuccess: () => invalidateScenarioDependents(queryClient, scenarioId),
   });
 }
 
-/** Update an existing farmer */
 export function useUpdateFarmer() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, dto }: { id: number; dto: UpdateFarmerDto }) =>
-      updateFarmerApi({ id, dto }),
-    onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.farmers.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.farmers.detail(id) });
-    },
+    mutationFn: ({ id, dto }: { id: string; dto: UpdateFarmerDto }) =>
+      updateFarmer(scenarioId, id, dto),
+    onSuccess: () => invalidateScenarioDependents(queryClient, scenarioId),
   });
 }
 
-/** Delete a farmer */
 export function useDeleteFarmer() {
+  const scenarioId = useScenarioStore((state) => state.scenarioId);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => deleteFarmerApi(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.farmers.all });
-    },
+    mutationFn: (id: string) => deleteFarmer(scenarioId, id),
+    onSuccess: () => invalidateScenarioDependents(queryClient, scenarioId),
   });
 }
