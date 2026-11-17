@@ -45,6 +45,9 @@ export const farmerSchema = z
     qualityGrade: z.enum(QUALITY_GRADES),
     availableFrom: isoDate,
     createdAt: z.string().min(1),
+    reservedKg: z.number().nonnegative().optional(),
+    completedKg: z.number().nonnegative().optional(),
+    description: z.string().optional(),
   })
   .superRefine((farmer, ctx) => {
     if (farmer.minPricePerKg > farmer.pricePerKg) {
@@ -67,6 +70,8 @@ export const buyerSchema = z.object({
   minQualityGrade: z.enum(QUALITY_GRADES),
   requiredFrom: isoDate,
   createdAt: z.string().min(1),
+  description: z.string().optional(),
+  demandStatus: z.enum(['Active', 'Pending', 'Fulfilled', 'Cancelled']).optional(),
 });
 
 const blockedCorridorSchema = z.object({

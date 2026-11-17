@@ -7,6 +7,7 @@ import { createDashboardRouter } from './dashboard';
 import { createFarmersRouter } from './farmers';
 import { createHealthRouter } from './health';
 import { createMatchesRouter } from './matches';
+import { createOrdersRouter } from './orders';
 import { createPricesRouter } from './prices';
 import { createScenariosRouter } from './scenarios';
 import { createUploadRouter } from './upload';
@@ -23,6 +24,7 @@ export function createApiRouter(store: DataStore): Router {
         'GET /api/scenarios/:id/data',
         'GET|POST /api/farmers',
         'GET|POST /api/buyers',
+        'GET|POST /api/orders',
         'POST /api/upload/csv',
         'POST /api/matches',
         'POST /api/allocate',
@@ -35,6 +37,7 @@ export function createApiRouter(store: DataStore): Router {
   router.use('/scenarios', createScenariosRouter(store));
   router.use('/farmers', createFarmersRouter(store));
   router.use('/buyers', createBuyersRouter(store));
+  router.use('/orders', createOrdersRouter(store));
   router.use('/upload/csv', createUploadRouter(store));
   router.use('/matches', createMatchesRouter(store));
   router.use('/allocate', createAllocationRouter(store));

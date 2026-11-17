@@ -51,6 +51,7 @@ export const farmerCreateSchema = z
     minPricePerKg: z.number().positive().max(100_000).optional(),
     qualityGrade: qualityGradeSchema.optional(),
     availableFrom: isoDateSchema.optional(),
+    description: z.string().optional(),
   })
   .superRefine((farmer, ctx) => {
     if (farmer.minPricePerKg !== undefined && farmer.minPricePerKg > farmer.pricePerKg) {
@@ -71,6 +72,9 @@ export const farmerUpdateSchema = z.object({
   minPricePerKg: z.number().positive().max(100_000).optional(),
   qualityGrade: qualityGradeSchema.optional(),
   availableFrom: isoDateSchema.optional(),
+  description: z.string().optional(),
+  reservedKg: z.number().nonnegative().optional(),
+  completedKg: z.number().nonnegative().optional(),
 });
 
 export const buyerCreateSchema = z
@@ -84,6 +88,8 @@ export const buyerCreateSchema = z
     minAcceptableQuantityKg: z.number().int().positive().max(1_000_000).optional(),
     minQualityGrade: qualityGradeSchema.optional(),
     requiredFrom: isoDateSchema.optional(),
+    description: z.string().optional(),
+    demandStatus: z.enum(['Active', 'Pending', 'Fulfilled', 'Cancelled']).optional(),
   })
   .superRefine((buyer, ctx) => {
     if (
@@ -107,6 +113,24 @@ export const buyerUpdateSchema = z.object({
   minAcceptableQuantityKg: z.number().int().positive().max(1_000_000).optional(),
   minQualityGrade: qualityGradeSchema.optional(),
   requiredFrom: isoDateSchema.optional(),
+  description: z.string().optional(),
+  demandStatus: z.enum(['Active', 'Pending', 'Fulfilled', 'Cancelled']).optional(),
+});
+
+export const orderCreateSchema = z.object({
+  buyerId: z.string().min(1),
+  buyerName: z.string().min(1),
+  farmerId: z.string().min(1),
+  cropId: z.string().min(1),
+  quantityKg: z.number().positive().max(1_000_000),
+  deliveryLocation: z.string().min(1),
+  orderNote: z.string().optional(),
+  buyerContact: z.string().optional(),
+});
+
+export const orderStatusUpdateSchema = z.object({
+  orderStatus: z.enum(['Pending', 'Accepted', 'Rejected', 'Completed', 'Cancelled']),
+  rejectionReason: z.string().optional(),
 });
 
 export const matchBodySchema = z.object({

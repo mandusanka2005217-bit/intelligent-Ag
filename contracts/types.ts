@@ -91,6 +91,10 @@ export interface Farmer {
   qualityGrade: QualityGrade;
   availableFrom: string;
   createdAt: string;
+  // Extended inventory tracking
+  reservedKg?: number;
+  completedKg?: number;
+  description?: string;
 }
 
 export interface Buyer {
@@ -104,6 +108,8 @@ export interface Buyer {
   minQualityGrade: QualityGrade;
   requiredFrom: string;
   createdAt: string;
+  description?: string;
+  demandStatus?: 'Active' | 'Pending' | 'Fulfilled' | 'Cancelled';
 }
 
 export interface CreateFarmerDto {
@@ -118,9 +124,13 @@ export interface CreateFarmerDto {
   qualityGrade?: QualityGrade;
   /** Defaults to today when omitted. */
   availableFrom?: string;
+  description?: string;
 }
 
-export type UpdateFarmerDto = Partial<CreateFarmerDto>;
+export type UpdateFarmerDto = Partial<CreateFarmerDto> & {
+  reservedKg?: number;
+  completedKg?: number;
+};
 
 export interface CreateBuyerDto {
   name: string;
@@ -134,9 +144,53 @@ export interface CreateBuyerDto {
   minQualityGrade?: QualityGrade;
   /** Defaults to today when omitted. */
   requiredFrom?: string;
+  description?: string;
+  demandStatus?: 'Active' | 'Pending' | 'Fulfilled' | 'Cancelled';
 }
 
 export type UpdateBuyerDto = Partial<CreateBuyerDto>;
+
+// ---------------------------------------------------------------------------
+// Order Management Types
+// ---------------------------------------------------------------------------
+
+export type OrderStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Completed' | 'Cancelled';
+
+export interface Order {
+  id: string;
+  buyerId: string;
+  buyerName: string;
+  farmerId: string;
+  farmerName: string;
+  cropId: string;
+  cropType: Product;
+  quantityKg: number;
+  pricePerKg: number;
+  totalAmount: number;
+  deliveryLocation: string;
+  orderNote?: string;
+  rejectionReason?: string;
+  orderStatus: OrderStatus;
+  buyerContact?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateOrderDto {
+  buyerId: string;
+  buyerName: string;
+  farmerId: string;
+  cropId: string;
+  quantityKg: number;
+  deliveryLocation: string;
+  orderNote?: string;
+  buyerContact?: string;
+}
+
+export interface UpdateOrderStatusDto {
+  orderStatus: OrderStatus;
+  rejectionReason?: string;
+}
 
 export interface FarmerFilters {
   search?: string;

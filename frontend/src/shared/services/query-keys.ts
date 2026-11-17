@@ -52,6 +52,12 @@ export const queryKeys = {
       [...queryKeys.prices.all, 'anomaly', scenarioId, product] as const,
   },
 
+  orders: {
+    all: ['orders'] as const,
+    list: (filters?: object) => [...queryKeys.orders.all, 'list', filters ?? {}] as const,
+    detail: (id: string) => [...queryKeys.orders.all, 'detail', id] as const,
+  },
+
   dashboard: {
     all: ['dashboard'] as const,
     stats: (scenarioId: ScenarioId) =>

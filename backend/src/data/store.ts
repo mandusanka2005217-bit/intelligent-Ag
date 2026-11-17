@@ -6,8 +6,11 @@ import type {
   Constraints,
   CreateBuyerDto,
   CreateFarmerDto,
+  CreateOrderDto,
   Farmer,
   FarmerFilters,
+  Order,
+  OrderStatus,
   PricePoint,
   Product,
   ScenarioData,
@@ -15,6 +18,7 @@ import type {
   ScenarioMeta,
   UpdateBuyerDto,
   UpdateFarmerDto,
+  UpdateOrderStatusDto,
 } from '@contracts/types';
 import { DEMO_TODAY } from '../config';
 import { buyerSchema, farmerSchema, type LoadedData } from './loader';
@@ -57,16 +61,17 @@ export class DataStore {
 
   private farmers: Record<ScenarioId, Farmer[]>;
   private buyers: Record<ScenarioId, Buyer[]>;
+  private orders: Order[] = [];
 
   constructor(loaded: LoadedData) {
     this.loaded = loaded;
     this.farmers = {
-      A: loaded.farmers.A.map((farmer) => ({ ...farmer })),
-      B: loaded.farmers.B.map((farmer) => ({ ...farmer })),
+      A: loaded.farmers.A.map((farmer) => ({ ...farmer, reservedKg: 0, completedKg: 0 })),
+      B: loaded.farmers.B.map((farmer) => ({ ...farmer, reservedKg: 0, completedKg: 0 })),
     };
     this.buyers = {
-      A: loaded.buyers.A.map((buyer) => ({ ...buyer })),
-      B: loaded.buyers.B.map((buyer) => ({ ...buyer })),
+      A: loaded.buyers.A.map((buyer) => ({ ...buyer, demandStatus: 'Active' })),
+      B: loaded.buyers.B.map((buyer) => ({ ...buyer, demandStatus: 'Active' })),
     };
     this.anomalies = {
       A: buildAnomalyMap(loaded.priceHistory.A, loaded.constraints.anomaly, loaded.marketPrices.A),
@@ -267,6 +272,126 @@ export class DataStore {
     this.buyers[id] = this.buyers[id].filter((buyer) => buyer.id !== buyerId);
     if (this.buyers[id].length === before) throw new NotFoundError(`Buyer ${buyerId} not found`);
     this.revision += 1;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Order Management and Inventory Consistency
+  // ---------------------------------------------------------------------------
+
+  listOrders(filters?: { buyerId?: string; farmerId?: string; status?: OrderStatus }): Order[] {
+    let result = [...this.orders];
+    if (filters?.buyerId) {
+      result = result.filter((o) => o.buyerId === filters.buyerId);
+    }
+    if (filters?.farmerId) {
+      result = result.filter((o) => o.farmerId === filters.farmerId);
+    }
+    if (filters?.status) {
+      result = result.filter((o) => o.orderStatus === filters.status);
+    }
+    return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  getOrder(orderId: string): Order {
+    const order = this.orders.find((o) => o.id === orderId);
+    if (!order) throw new NotFoundError(`Order ${orderId} not found`);
+    return order;
+  }
+
+  createOrder(dto: CreateOrderDto, scenarioId: ScenarioId = 'A'): Order {
+    const farmer = this.farmers[scenarioId].find((f) => f.id === dto.cropId || f.id === dto.farmerId);
+    if (!farmer) throw new NotFoundError(`Crop/Farmer ${dto.cropId} not found`);
+
+    const reserved = farmer.reservedKg ?? 0;
+    const completed = farmer.completedKg ?? 0;
+    const available = Math.max(0, farmer.quantityKg - reserved - completed);
+
+    if (dto.quantityKg <= 0) {
+      throw new ValidationError('Order quantity must be greater than zero');
+    }
+    if (dto.quantityKg > available) {
+      throw new ValidationError(`Order quantity (${dto.quantityKg}kg) exceeds available quantity (${available}kg)`);
+    }
+
+    const orderId = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
+    const totalAmount = round(dto.quantityKg * farmer.pricePerKg, 2);
+
+    const order: Order = {
+      id: orderId,
+      buyerId: dto.buyerId,
+      buyerName: dto.buyerName,
+      farmerId: farmer.id,
+      farmerName: farmer.name,
+      cropId: farmer.id,
+      cropType: farmer.cropType,
+      quantityKg: dto.quantityKg,
+      pricePerKg: farmer.pricePerKg,
+      totalAmount,
+      deliveryLocation: dto.deliveryLocation,
+      orderNote: dto.orderNote,
+      orderStatus: 'Pending',
+      buyerContact: dto.buyerContact,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.orders.push(order);
+    this.revision += 1;
+    return order;
+  }
+
+  updateOrderStatus(
+    orderId: string,
+    dto: UpdateOrderStatusDto,
+    scenarioId: ScenarioId = 'A',
+  ): Order {
+    const order = this.getOrder(orderId);
+    const farmer = this.farmers[scenarioId].find((f) => f.id === order.farmerId || f.id === order.cropId);
+
+    const prevStatus = order.orderStatus;
+    const newStatus = dto.orderStatus;
+
+    if (prevStatus === newStatus) return order;
+
+    if (farmer) {
+      const currentReserved = farmer.reservedKg ?? 0;
+      const currentCompleted = farmer.completedKg ?? 0;
+
+      // State transitions:
+      // 1. Pending -> Accepted: Reserve quantity
+      if (newStatus === 'Accepted' && prevStatus === 'Pending') {
+        const available = Math.max(0, farmer.quantityKg - currentReserved - currentCompleted);
+        if (order.quantityKg > available) {
+          throw new ValidationError(`Cannot accept order: only ${available}kg currently available`);
+        }
+        farmer.reservedKg = currentReserved + order.quantityKg;
+      }
+
+      // 2. Accepted -> Rejected or Cancelled: Release reserved quantity
+      if ((newStatus === 'Rejected' || newStatus === 'Cancelled') && prevStatus === 'Accepted') {
+        farmer.reservedKg = Math.max(0, currentReserved - order.quantityKg);
+      }
+
+      // 3. Accepted -> Completed: Move reserved to completed sales
+      if (newStatus === 'Completed' && prevStatus === 'Accepted') {
+        farmer.reservedKg = Math.max(0, currentReserved - order.quantityKg);
+        farmer.completedKg = currentCompleted + order.quantityKg;
+      }
+
+      // 4. Pending -> Completed: Direct completion
+      if (newStatus === 'Completed' && prevStatus === 'Pending') {
+        farmer.completedKg = currentCompleted + order.quantityKg;
+      }
+    }
+
+    order.orderStatus = newStatus;
+    if (dto.rejectionReason) {
+      order.rejectionReason = dto.rejectionReason;
+    }
+    order.updatedAt = new Date().toISOString();
+
+    this.revision += 1;
+    return order;
   }
 
   getAnomalies(id: ScenarioId): Record<string, AnomalyInfo> {
