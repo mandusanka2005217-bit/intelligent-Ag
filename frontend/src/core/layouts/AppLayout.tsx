@@ -70,9 +70,17 @@ const PageFallback: React.FC = () => (
 );
 
 const AppLayout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  const [sidebarOpen, setSidebarOpen] = React.useState(() => {
+    return typeof window !== 'undefined' ? window.innerWidth > 900 : true;
+  });
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const location = useLocation();
   const { currentUser } = useAuthStore();
+
+  // Close mobile menu on route change
+  React.useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const user = currentUser || {
     id: 'admin-01',
@@ -94,10 +102,30 @@ const AppLayout: React.FC = () => {
 
   return (
     <div className="app-layout">
-      <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : 'sidebar--collapsed'}`}>
+      {/* Mobile Drawer Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-overlay"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`sidebar ${sidebarOpen ? 'sidebar--open' : 'sidebar--collapsed'} ${
+          mobileMenuOpen ? 'sidebar--mobile-open' : ''
+        }`}
+      >
         <div className="sidebar__header">
           <Leaf size={28} className="sidebar__logo-icon" />
-          {sidebarOpen && <span className="sidebar__brand">AgriSupply</span>}
+          {(sidebarOpen || mobileMenuOpen) && <span className="sidebar__brand">AgriSupply</span>}
+          <button
+            className="sidebar__mobile-close"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="sidebar__nav" aria-label="Main navigation">
@@ -105,12 +133,13 @@ const AppLayout: React.FC = () => {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={() => setMobileMenuOpen(false)}
               className={({ isActive }) =>
                 `sidebar__nav-item ${isActive ? 'sidebar__nav-item--active' : ''}`
               }
             >
               <span className="sidebar__nav-icon">{item.icon}</span>
-              {sidebarOpen && <span className="sidebar__nav-label">{item.label}</span>}
+              {(sidebarOpen || mobileMenuOpen) && <span className="sidebar__nav-label">{item.label}</span>}
             </NavLink>
           ))}
         </nav>
@@ -130,7 +159,16 @@ const AppLayout: React.FC = () => {
 
       <div className="main-content">
         <header className="topbar">
-          <h1 className="topbar__title">{pageTitle}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              className="mobile-menu-trigger"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
+            >
+              <Menu size={22} />
+            </button>
+            <h1 className="topbar__title">{pageTitle}</h1>
+          </div>
           <div className="topbar__actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <RoleSwitcher />
             <SimulatedBadge compact />
