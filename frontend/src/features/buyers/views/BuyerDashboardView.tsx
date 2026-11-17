@@ -42,12 +42,21 @@ const LOCATIONS = [
 
 export const BuyerDashboardView: React.FC = () => {
   const { currentUser } = useAuthStore();
+  const user = currentUser || {
+    id: 'buyer-demo',
+    name: 'Keells Logistics Hub',
+    username: 'buyer@demo.com',
+    role: 'buyer' as const,
+    avatar: '🛒',
+    location: 'Peliyagoda Central Hub',
+    createdAt: ''
+  };
   const { data: allBuyers = [], isLoading } = useBuyers();
   const createBuyerMutation = useCreateBuyer();
 
   // Find requirements for demo buyer or top demands
   const myDemands = allBuyers.filter(
-    (b) => b.name.toLowerCase().includes('keells') || b.location === currentUser.location
+    (b) => b.name.toLowerCase().includes('keells') || b.location === user.location
   );
   const displayDemands = myDemands.length > 0 ? myDemands : allBuyers.slice(0, 4);
 
@@ -55,7 +64,7 @@ export const BuyerDashboardView: React.FC = () => {
   const [requiredProduct, setRequiredProduct] = useState<Product>('Potato');
   const [requiredQuantityKg, setRequiredQuantityKg] = useState<number>(1000);
   const [maxPricePerKg, setMaxPricePerKg] = useState<number>(240);
-  const [buyerLocation, setBuyerLocation] = useState<string>(currentUser.location.split(',')[0] || 'Colombo');
+  const [buyerLocation, setBuyerLocation] = useState<string>(user.location.split(',')[0] || 'Colombo');
   const [minQualityGrade, setMinQualityGrade] = useState<QualityGrade>('B');
   const [minQuantity, setMinQuantity] = useState<number>(100);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -64,7 +73,7 @@ export const BuyerDashboardView: React.FC = () => {
     e.preventDefault();
     try {
       const dto: CreateBuyerDto = {
-        name: currentUser.name,
+        name: user.name,
         requiredCropType: requiredProduct,
         requiredQuantityKg: Number(requiredQuantityKg),
         maxPricePerKg: Number(maxPricePerKg),
@@ -89,11 +98,11 @@ export const BuyerDashboardView: React.FC = () => {
         <div>
           <h2 className="page-header__title">🛒 Buyer Management Dashboard</h2>
           <p className="page-header__subtitle">
-            Organization: <strong>{currentUser.name}</strong> · Hub: {currentUser.location}
+            Organization: <strong>{user.name}</strong> · Hub: {user.location}
           </p>
         </div>
         <div className="page-header__actions">
-          <span className="badge badge--warning">Wholesale Buyer ID: #{currentUser.id}</span>
+          <span className="badge badge--warning">Wholesale Buyer ID: #{user.id}</span>
         </div>
       </div>
 

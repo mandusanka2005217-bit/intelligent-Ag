@@ -62,12 +62,22 @@ const AppLayout: React.FC = () => {
   const location = useLocation();
   const { currentUser } = useAuthStore();
 
+  const user = currentUser || {
+    id: 'admin-01',
+    name: 'Ravindu (System Admin)',
+    username: 'ravindu@2005',
+    role: 'admin' as const,
+    avatar: '🛡️',
+    location: 'Central Command, Colombo',
+    createdAt: ''
+  };
+
   const activeNav = navItems.find((item) => location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to)));
   const pageTitle = activeNav?.label ?? 'Agricultural Supply Chain';
 
   // Filter navigation items by current role
   const visibleNavItems = navItems.filter(
-    (item) => !item.allowedRoles || item.allowedRoles.includes(currentUser.role)
+    (item) => !item.allowedRoles || item.allowedRoles.includes(user.role)
   );
 
   return (
@@ -117,8 +127,8 @@ const AppLayout: React.FC = () => {
             </button>
             <div
               className="topbar__avatar"
-              aria-label={currentUser.name}
-              title={`${currentUser.name} (${currentUser.role})`}
+              aria-label={user.name}
+              title={`${user.name} (${user.role})`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -127,7 +137,7 @@ const AppLayout: React.FC = () => {
                 cursor: 'pointer'
               }}
             >
-              {currentUser.avatar}
+              {user.avatar}
             </div>
           </div>
         </header>

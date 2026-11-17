@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import AppLayout from './core/layouts/AppLayout';
+import ProtectedLayout from './core/layouts/ProtectedLayout';
+import LoginPage from './core/layouts/LoginPage';
 import NotFoundPage from './core/layouts/NotFoundPage';
 import { dashboardRoutes } from './features/dashboard/routes';
 import { farmerRoutes } from './features/farmers/routes';
@@ -9,14 +10,14 @@ import { allocationRoutes } from './features/allocation/routes';
 import { strategyRoutes } from './features/strategies/routes';
 import { priceRoutes } from './features/prices/routes';
 
-/**
- * Route aggregation. Each feature owns its own `routes.ts`; this file only
- * composes them under the shared layout. Elements are lazy-loaded per feature.
- */
 export const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
     path: '/',
-    element: <AppLayout />,
+    element: <ProtectedLayout />,
     children: [
       {
         index: true,

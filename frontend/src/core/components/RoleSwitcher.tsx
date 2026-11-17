@@ -1,13 +1,14 @@
 import React from 'react';
-import { useAuthStore, DEMO_USERS, UserRole } from '@/core/store/authStore';
+import { useAuthStore, UserRole } from '@/core/store/authStore';
 import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 
 export const RoleSwitcher: React.FC = () => {
-  const { currentUser, switchUser } = useAuthStore();
+  const { currentUser, switchDemoRole, logout } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSwitch = (role: UserRole) => {
-    switchUser(role);
+    switchDemoRole(role);
     if (role === 'farmer') {
       navigate('/farmer-dashboard');
     } else if (role === 'buyer') {
@@ -17,15 +18,20 @@ export const RoleSwitcher: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f3f4f6', padding: '0.25rem 0.5rem', borderRadius: '8px' }}>
       <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
-        Demo Role:
+        Demo Switch:
       </span>
       <div style={{ display: 'flex', gap: '0.25rem' }}>
         {(['admin', 'farmer', 'buyer'] as UserRole[]).map((role) => {
-          const user = DEMO_USERS[role];
-          const isActive = currentUser.role === role;
+          const isActive = currentUser?.role === role;
+          const label = role === 'admin' ? '🛡️ Admin' : role === 'farmer' ? '🌾 Farmer' : '🛒 Buyer';
           return (
             <button
               key={role}
@@ -46,14 +52,35 @@ export const RoleSwitcher: React.FC = () => {
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
-              title={user.description}
             >
-              <span>{user.avatar}</span>
-              <span>{role === 'admin' ? 'Admin' : role === 'farmer' ? 'Farmer' : 'Buyer'}</span>
+              <span>{label}</span>
             </button>
           );
         })}
       </div>
+
+      <button
+        type="button"
+        onClick={handleLogout}
+        title="Logout to Welcome Screen"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.25rem',
+          marginLeft: '0.25rem',
+          padding: '0.25rem 0.5rem',
+          background: '#fee2e2',
+          color: '#b91c1c',
+          border: '1px solid #fca5a5',
+          borderRadius: '6px',
+          fontSize: '0.75rem',
+          cursor: 'pointer',
+          fontWeight: 600
+        }}
+      >
+        <LogOut size={14} />
+        Logout
+      </button>
     </div>
   );
 };

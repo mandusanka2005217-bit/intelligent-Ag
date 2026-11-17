@@ -43,12 +43,21 @@ const LOCATIONS = [
 
 export const FarmerDashboardView: React.FC = () => {
   const { currentUser } = useAuthStore();
+  const user = currentUser || {
+    id: 'farmer-demo',
+    name: 'Sunil Shantha',
+    username: 'farmer@demo.com',
+    role: 'farmer' as const,
+    avatar: '🌾',
+    location: 'Nuwara Eliya',
+    createdAt: ''
+  };
   const { data: allFarmers = [], isLoading } = useFarmers();
   const createFarmerMutation = useCreateFarmer();
 
   // Filter listings belonging to Sunil or show active demo farmer's items
   const myListings = allFarmers.filter(
-    (f) => f.name.toLowerCase().includes('sunil') || f.location === currentUser.location
+    (f) => f.name.toLowerCase().includes('sunil') || f.location === user.location
   );
   const displayListings = myListings.length > 0 ? myListings : allFarmers.slice(0, 4);
 
@@ -56,7 +65,7 @@ export const FarmerDashboardView: React.FC = () => {
   const [productType, setProductType] = useState<Product>('Tomato');
   const [quantityKg, setQuantityKg] = useState<number>(500);
   const [pricePerKg, setPricePerKg] = useState<number>(180);
-  const [location, setLocation] = useState<string>(currentUser.location.split(',')[0] || 'Nuwara Eliya');
+  const [location, setLocation] = useState<string>(user.location.split(',')[0] || 'Nuwara Eliya');
   const [availabilityStatus, setAvailabilityStatus] = useState<'Available' | 'Partially Allocated' | 'Sold Out'>('Available');
   const [qualityGrade, setQualityGrade] = useState<QualityGrade>('A');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -65,7 +74,7 @@ export const FarmerDashboardView: React.FC = () => {
     e.preventDefault();
     try {
       const dto: CreateFarmerDto = {
-        name: currentUser.name,
+        name: user.name,
         cropType: productType,
         quantityKg: Number(quantityKg),
         pricePerKg: Number(pricePerKg),
@@ -90,11 +99,11 @@ export const FarmerDashboardView: React.FC = () => {
         <div>
           <h2 className="page-header__title">🌾 Farmer Dashboard</h2>
           <p className="page-header__subtitle">
-            Welcome back, <strong>{currentUser.name}</strong> · Profile: {currentUser.location}
+            Welcome back, <strong>{user.name}</strong> · Profile: {user.location}
           </p>
         </div>
         <div className="page-header__actions">
-          <span className="badge badge--success">Verified Farmer ID: #{currentUser.id}</span>
+          <span className="badge badge--success">Verified Farmer ID: #{user.id}</span>
         </div>
       </div>
 
