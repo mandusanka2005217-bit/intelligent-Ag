@@ -235,33 +235,6 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Quick Demo Access Bar */}
-            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.75rem', fontWeight: 600 }}>
-                🚀 Quick 1-Click Demo Login:
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => handleQuickDemoLogin('admin')}
-                  style={{ padding: '0.4rem 0.8rem', background: '#e0e7ff', color: '#3730a3', border: 'none', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  🛡️ Admin Access
-                </button>
-                <button
-                  onClick={() => handleQuickDemoLogin('farmer')}
-                  style={{ padding: '0.4rem 0.8rem', background: '#dcfce7', color: '#15803d', border: 'none', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  🌾 Farmer Demo
-                </button>
-                <button
-                  onClick={() => handleQuickDemoLogin('buyer')}
-                  style={{ padding: '0.4rem 0.8rem', background: '#ffedd5', color: '#9a3412', border: 'none', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  🛒 Buyer Demo
-                </button>
-              </div>
-            </div>
           </div>
         )}
 
