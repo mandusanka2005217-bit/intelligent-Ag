@@ -9,6 +9,15 @@ import { matchingRoutes } from './features/matching/routes';
 import { allocationRoutes } from './features/allocation/routes';
 import { strategyRoutes } from './features/strategies/routes';
 import { priceRoutes } from './features/prices/routes';
+import { useAuthStore } from './core/store/authStore';
+
+const IndexRedirect: React.FC = () => {
+  const currentUser = useAuthStore((s) => s.currentUser);
+  if (!currentUser) return <Navigate to="/login" replace />;
+  if (currentUser.role === 'farmer') return <Navigate to="/farmer-dashboard" replace />;
+  if (currentUser.role === 'buyer') return <Navigate to="/buyer-dashboard" replace />;
+  return <Navigate to="/dashboard" replace />;
+};
 
 export const router = createBrowserRouter([
   {
@@ -21,7 +30,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/dashboard" replace />,
+        element: <IndexRedirect />,
       },
       ...dashboardRoutes,
       ...farmerRoutes,

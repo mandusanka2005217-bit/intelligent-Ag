@@ -246,19 +246,19 @@ export const LoginPage: React.FC = () => {
                   onClick={() => handleQuickDemoLogin('admin')}
                   style={{ padding: '0.4rem 0.8rem', background: '#e0e7ff', color: '#3730a3', border: 'none', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
                 >
-                  🛡️ Admin Demo (ravindu@2005)
+                  🛡️ Admin Access
                 </button>
                 <button
                   onClick={() => handleQuickDemoLogin('farmer')}
                   style={{ padding: '0.4rem 0.8rem', background: '#dcfce7', color: '#15803d', border: 'none', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
                 >
-                  🌾 Farmer Demo (Sunil)
+                  🌾 Farmer Demo
                 </button>
                 <button
                   onClick={() => handleQuickDemoLogin('buyer')}
                   style={{ padding: '0.4rem 0.8rem', background: '#ffedd5', color: '#9a3412', border: 'none', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
                 >
-                  🛒 Buyer Demo (Keells)
+                  🛒 Buyer Demo
                 </button>
               </div>
             </div>
@@ -287,14 +287,6 @@ export const LoginPage: React.FC = () => {
               </div>
             )}
 
-            {selectedRole === 'admin' && (
-              <div style={{ background: '#eff6ff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #bfdbfe', fontSize: '0.8rem', color: '#1e40af', marginBottom: '1.25rem' }}>
-                <strong>Default Admin Account:</strong><br />
-                Username: <code>ravindu@2005</code><br />
-                Password: <code>ravindu2005@@</code>
-              </div>
-            )}
-
             <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.35rem', color: '#374151' }}>
@@ -305,7 +297,7 @@ export const LoginPage: React.FC = () => {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder={selectedRole === 'admin' ? 'ravindu@2005' : 'Enter username or email'}
+                    placeholder="Enter your username or email"
                     required
                     style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.9rem' }}
                   />

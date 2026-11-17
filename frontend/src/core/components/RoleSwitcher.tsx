@@ -23,41 +23,55 @@ export const RoleSwitcher: React.FC = () => {
     navigate('/login');
   };
 
+  const userRole = currentUser?.role || 'admin';
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f3f4f6', padding: '0.25rem 0.5rem', borderRadius: '8px' }}>
-      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
-        Demo Switch:
-      </span>
-      <div style={{ display: 'flex', gap: '0.25rem' }}>
-        {(['admin', 'farmer', 'buyer'] as UserRole[]).map((role) => {
-          const isActive = currentUser?.role === role;
-          const label = role === 'admin' ? '🛡️ Admin' : role === 'farmer' ? '🌾 Farmer' : '🛒 Buyer';
-          return (
-            <button
-              key={role}
-              type="button"
-              onClick={() => handleSwitch(role)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                padding: '0.25rem 0.6rem',
-                borderRadius: '6px',
-                fontSize: '0.8rem',
-                fontWeight: isActive ? 600 : 400,
-                background: isActive ? '#ffffff' : 'transparent',
-                color: isActive ? '#111827' : '#4b5563',
-                border: isActive ? '1px solid #d1d5db' : '1px solid transparent',
-                boxShadow: isActive ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <span>{label}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Show role switch buttons ONLY to Admin */}
+      {userRole === 'admin' ? (
+        <>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>
+            Admin Switch:
+          </span>
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            {(['admin', 'farmer', 'buyer'] as UserRole[]).map((role) => {
+              const isActive = currentUser?.role === role;
+              const label = role === 'admin' ? '🛡️ Admin' : role === 'farmer' ? '🌾 Farmer View' : '🛒 Buyer View';
+              return (
+                <button
+                  key={role}
+                  type="button"
+                  onClick={() => handleSwitch(role)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    padding: '0.25rem 0.6rem',
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    fontWeight: isActive ? 600 : 400,
+                    background: isActive ? '#ffffff' : 'transparent',
+                    color: isActive ? '#111827' : '#4b5563',
+                    border: isActive ? '1px solid #d1d5db' : '1px solid transparent',
+                    boxShadow: isActive ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.1rem 0.4rem' }}>
+          <span style={{ fontSize: '0.85rem' }}>{currentUser?.avatar}</span>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151' }}>
+            {currentUser?.name} ({currentUser?.role === 'farmer' ? 'Farmer' : 'Buyer'})
+          </span>
+        </div>
+      )}
 
       <button
         type="button"

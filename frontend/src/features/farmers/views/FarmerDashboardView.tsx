@@ -55,7 +55,7 @@ export const FarmerDashboardView: React.FC = () => {
   const { data: allFarmers = [], isLoading } = useFarmers();
   const createFarmerMutation = useCreateFarmer();
 
-  // Filter listings belonging to Sunil or show active demo farmer's items
+  // Filter listings belonging to user or fallback to top items
   const myListings = allFarmers.filter(
     (f) => f.name.toLowerCase().includes('sunil') || f.location === user.location
   );
@@ -94,86 +94,91 @@ export const FarmerDashboardView: React.FC = () => {
   const totalPotentialValue = displayListings.reduce((sum, item) => sum + (item.quantityKg * item.pricePerKg), 0);
 
   return (
-    <div className="farmer-dashboard">
-      <div className="page-header">
+    <div className="farmer-dashboard-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      {/* Page Header */}
+      <div className="page-header" style={{ marginBottom: 0 }}>
         <div>
-          <h2 className="page-header__title">🌾 Farmer Dashboard</h2>
+          <h2 className="page-header__title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span>🌾</span> Farmer Management Dashboard
+          </h2>
           <p className="page-header__subtitle">
-            Welcome back, <strong>{user.name}</strong> · Profile: {user.location}
+            Welcome back, <strong>{user.name}</strong> · Farm Location: <strong>{user.location}</strong>
           </p>
         </div>
         <div className="page-header__actions">
-          <span className="badge badge--success">Verified Farmer ID: #{user.id}</span>
+          <span className="badge badge--success" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', borderRadius: '6px' }}>
+            Verified Farmer Account: #{user.id}
+          </span>
         </div>
       </div>
 
       {/* KPI Cards for Farmer */}
-      <div className="kpi-grid" style={{ marginBottom: '1.5rem' }}>
-        <div className="kpi-card">
-          <div style={{ width: 40, height: 40, borderRadius: 8, background: '#d8f3dc', color: '#2d6a4f', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem' }}>
+      <div className="kpi-grid">
+        <div className="kpi-card" style={{ padding: '1.25rem' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 10, background: '#d8f3dc', color: '#2d6a4f', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
             <Package size={22} />
           </div>
           <span className="kpi-card__label">Total Supply Listed</span>
-          <span className="kpi-card__value kpi-card__value--small">{formatWeight(totalQuantity)}</span>
+          <span className="kpi-card__value kpi-card__value--small" style={{ margin: '0.25rem 0' }}>{formatWeight(totalQuantity)}</span>
           <span className="kpi-card__sub">{displayListings.length} harvest listings</span>
         </div>
 
-        <div className="kpi-card">
-          <div style={{ width: 40, height: 40, borderRadius: 8, background: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem' }}>
+        <div className="kpi-card" style={{ padding: '1.25rem' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 10, background: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
             <DollarSign size={22} />
           </div>
           <span className="kpi-card__label">Estimated Value</span>
-          <span className="kpi-card__value kpi-card__value--small">{formatCurrency(totalPotentialValue)}</span>
+          <span className="kpi-card__value kpi-card__value--small" style={{ margin: '0.25rem 0' }}>{formatCurrency(totalPotentialValue)}</span>
           <span className="kpi-card__sub">Expected revenue</span>
         </div>
 
-        <div className="kpi-card">
-          <div style={{ width: 40, height: 40, borderRadius: 8, background: '#e0f2fe', color: '#0369a1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem' }}>
+        <div className="kpi-card" style={{ padding: '1.25rem' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 10, background: '#e0f2fe', color: '#0369a1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
             <CheckCircle size={22} />
           </div>
           <span className="kpi-card__label">Availability Status</span>
-          <span className="kpi-card__value kpi-card__value--small" style={{ color: '#16a34a' }}>Active & Ready</span>
+          <span className="kpi-card__value kpi-card__value--small" style={{ color: '#16a34a', margin: '0.25rem 0' }}>Active & Ready</span>
           <span className="kpi-card__sub">High matching demand</span>
         </div>
 
-        <div className="kpi-card">
-          <div style={{ width: 40, height: 40, borderRadius: 8, background: '#ede9fe', color: '#6d28d9', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem' }}>
+        <div className="kpi-card" style={{ padding: '1.25rem' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 10, background: '#ede9fe', color: '#6d28d9', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
             <Sprout size={22} />
           </div>
           <span className="kpi-card__label">Primary Crop</span>
-          <span className="kpi-card__value kpi-card__value--small">Vegetables</span>
+          <span className="kpi-card__value kpi-card__value--small" style={{ margin: '0.25rem 0' }}>Vegetables</span>
           <span className="kpi-card__sub">Grade A/B standard</span>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '1.5rem' }}>
+      {/* Main Grid: Form and Listings */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.75rem', alignItems: 'start' }}>
         {/* Registration / Listing Form */}
-        <section className="card">
-          <div className="card__header">
+        <section className="card" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+          <div className="card__header" style={{ padding: '1.25rem 1.5rem', background: '#fafdfa' }}>
             <div>
-              <h3 className="card__title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <PlusCircle size={18} color="#2d6a4f" />
+              <h3 className="card__title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.05rem', color: '#166534' }}>
+                <PlusCircle size={20} color="#166534" />
                 Farmer Registration & Crop Listing
               </h3>
-              <p className="card__subtitle">List new agricultural harvest for buyer allocation</p>
+              <p className="card__subtitle" style={{ marginTop: '0.25rem' }}>List new agricultural harvest for buyer allocation</p>
             </div>
           </div>
-          <div className="card__body">
+          <div className="card__body" style={{ padding: '1.5rem' }}>
             {successMessage && (
-              <div style={{ padding: '0.75rem', background: '#dcfce7', border: '1px solid #86efac', borderRadius: '8px', color: '#15803d', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <CheckCircle size={16} />
+              <div style={{ padding: '0.85rem 1rem', background: '#dcfce7', border: '1px solid #86efac', borderRadius: '8px', color: '#15803d', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                <CheckCircle size={18} />
                 <span>{successMessage}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div>
-                <label className="field-label" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Product Type</label>
+                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: '0.4rem' }}>Product Type *</label>
                 <select
                   value={productType}
                   onChange={(e) => setProductType(e.target.value as Product)}
-                  className="input-select"
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                  style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.9rem', background: '#ffffff' }}
                   required
                 >
                   {PRODUCTS.map((p) => (
@@ -184,26 +189,26 @@ export const FarmerDashboardView: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label className="field-label" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Available Quantity (kg)</label>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: '0.4rem' }}>Available Quantity (kg) *</label>
                   <input
                     type="number"
                     min="10"
                     step="10"
                     value={quantityKg}
                     onChange={(e) => setQuantityKg(Number(e.target.value))}
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                    style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.9rem' }}
                     required
                   />
                 </div>
                 <div>
-                  <label className="field-label" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Expected Selling Price (LKR/kg)</label>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: '0.4rem' }}>Expected Selling Price (LKR/kg) *</label>
                   <input
                     type="number"
                     min="10"
                     step="1"
                     value={pricePerKg}
                     onChange={(e) => setPricePerKg(Number(e.target.value))}
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                    style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.9rem' }}
                     required
                   />
                 </div>
@@ -211,11 +216,11 @@ export const FarmerDashboardView: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label className="field-label" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Location / Farm Origin</label>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: '0.4rem' }}>Farm Location *</label>
                   <select
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                    style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.9rem', background: '#ffffff' }}
                   >
                     {LOCATIONS.map((loc) => (
                       <option key={loc} value={loc}>{loc}</option>
@@ -223,11 +228,11 @@ export const FarmerDashboardView: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="field-label" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Availability Status</label>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: '0.4rem' }}>Availability Status</label>
                   <select
                     value={availabilityStatus}
                     onChange={(e) => setAvailabilityStatus(e.target.value as any)}
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                    style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.9rem', background: '#ffffff' }}
                   >
                     <option value="Available">Available (Now)</option>
                     <option value="Partially Allocated">Partially Allocated</option>
@@ -237,10 +242,10 @@ export const FarmerDashboardView: React.FC = () => {
               </div>
 
               <div>
-                <label className="field-label" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Quality Grade</label>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
+                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#374151', marginBottom: '0.4rem' }}>Quality Grade</label>
+                <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.35rem' }}>
                   {(['A', 'B', 'C'] as QualityGrade[]).map((grade) => (
-                    <label key={grade} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer' }}>
+                    <label key={grade} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.9rem' }}>
                       <input
                         type="radio"
                         name="qualityGrade"
@@ -258,58 +263,68 @@ export const FarmerDashboardView: React.FC = () => {
                 type="submit"
                 disabled={createFarmerMutation.isPending}
                 className="btn btn--primary"
-                style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.75rem',
+                  fontSize: '0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  borderRadius: '8px',
+                  background: '#166534'
+                }}
               >
                 <PlusCircle size={18} />
-                {createFarmerMutation.isPending ? 'Registering...' : 'List Crop Availability'}
+                {createFarmerMutation.isPending ? 'Registering Produce...' : 'Publish Crop Availability'}
               </button>
             </form>
           </div>
         </section>
 
         {/* Existing Listings / Inventory Table */}
-        <section className="card">
-          <div className="card__header">
+        <section className="card" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+          <div className="card__header" style={{ padding: '1.25rem 1.5rem', background: '#fafdfa' }}>
             <div>
-              <h3 className="card__title">My Registered Crops & Harvests</h3>
-              <p className="card__subtitle">Real-time status of your listed agricultural products</p>
+              <h3 className="card__title" style={{ fontSize: '1.05rem' }}>My Registered Crops & Harvests</h3>
+              <p className="card__subtitle" style={{ marginTop: '0.25rem' }}>Real-time inventory and pricing status</p>
             </div>
           </div>
           <div className="card__body" style={{ padding: 0 }}>
             {isLoading ? (
-              <div style={{ padding: '2rem', textAlign: 'center' }}>Loading your crops...</div>
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>Loading your crops...</div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
-                <table className="table" style={{ width: '100%' }}>
+                <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
-                      <th>Product</th>
-                      <th>Quantity</th>
-                      <th>Expected Price</th>
-                      <th>Location</th>
-                      <th>Status</th>
+                      <th style={{ padding: '0.85rem 1.25rem' }}>Product</th>
+                      <th style={{ padding: '0.85rem 1.25rem' }}>Quantity</th>
+                      <th style={{ padding: '0.85rem 1.25rem' }}>Expected Price</th>
+                      <th style={{ padding: '0.85rem 1.25rem' }}>Location</th>
+                      <th style={{ padding: '0.85rem 1.25rem' }}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {displayListings.map((item) => (
                       <tr key={item.id}>
-                        <td>
-                          <strong>{item.cropType}</strong>
-                          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Grade {item.qualityGrade}</div>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>
+                          <strong style={{ color: '#166534' }}>{item.cropType}</strong>
+                          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>Grade {item.qualityGrade}</div>
                         </td>
-                        <td>{formatWeight(item.quantityKg)}</td>
-                        <td>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>{formatWeight(item.quantityKg)}</td>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>
                           <strong>{formatCurrency(item.pricePerKg)}</strong>/kg
-                          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Min: Rs. {item.minPricePerKg}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>Min: Rs. {item.minPricePerKg}</div>
                         </td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', color: '#4b5563' }}>
                             <MapPin size={14} color="#6b7280" />
                             {item.location}
                           </div>
                         </td>
-                        <td>
-                          <span className="badge badge--success" style={{ background: '#dcfce7', color: '#166534', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                        <td style={{ padding: '0.85rem 1.25rem' }}>
+                          <span style={{ background: '#dcfce7', color: '#166534', padding: '0.3rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
                             Available
                           </span>
                         </td>
