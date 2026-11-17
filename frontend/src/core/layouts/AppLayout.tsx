@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard,
   Users,
   ShoppingCart,
   GitMerge,
@@ -12,23 +11,31 @@ import {
   Menu,
   X,
   Bell,
+  Sprout,
+  ShieldCheck
 } from 'lucide-react';
 import SimulatedBadge from '@/shared/components/SimulatedBadge';
 import Skeleton from '@/shared/components/Skeleton';
+import RoleSwitcher from '@/core/components/RoleSwitcher';
+import { useAuthStore } from '@/core/store/authStore';
+
 interface NavItem {
   label: string;
   to: string;
   icon: React.ReactNode;
+  allowedRoles?: ('admin' | 'farmer' | 'buyer')[];
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', to: '/dashboard', icon: <LayoutDashboard size={20} /> },
-  { label: 'Farmers', to: '/farmers', icon: <Users size={20} /> },
-  { label: 'Buyers', to: '/buyers', icon: <ShoppingCart size={20} /> },
-  { label: 'Matching', to: '/matching', icon: <GitMerge size={20} /> },
-  { label: 'Allocation', to: '/allocation', icon: <BarChart3 size={20} /> },
-  { label: 'Strategies', to: '/strategies', icon: <Scale size={20} /> },
-  { label: 'Prices', to: '/prices', icon: <TrendingUp size={20} /> },
+  { label: 'Admin Dashboard', to: '/dashboard', icon: <ShieldCheck size={20} />, allowedRoles: ['admin'] },
+  { label: 'Farmer Dashboard', to: '/farmer-dashboard', icon: <Sprout size={20} />, allowedRoles: ['admin', 'farmer'] },
+  { label: 'Buyer Dashboard', to: '/buyer-dashboard', icon: <ShoppingCart size={20} />, allowedRoles: ['admin', 'buyer'] },
+  { label: 'Farmers List', to: '/farmers', icon: <Users size={20} />, allowedRoles: ['admin', 'farmer'] },
+  { label: 'Buyers List', to: '/buyers', icon: <ShoppingCart size={20} />, allowedRoles: ['admin', 'buyer'] },
+  { label: 'Matching Engine', to: '/matching', icon: <GitMerge size={20} />, allowedRoles: ['admin'] },
+  { label: 'Allocation Engine', to: '/allocation', icon: <BarChart3 size={20} />, allowedRoles: ['admin'] },
+  { label: 'Strategies', to: '/strategies', icon: <Scale size={20} />, allowedRoles: ['admin'] },
+  { label: 'Price Trends', to: '/prices', icon: <TrendingUp size={20} />, allowedRoles: ['admin', 'farmer', 'buyer'] },
 ];
 
 const PageFallback: React.FC = () => (
@@ -53,9 +60,15 @@ const PageFallback: React.FC = () => (
 const AppLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const location = useLocation();
+  const { currentUser } = useAuthStore();
 
-  const pageTitle =
-    navItems.find((item) => location.pathname.startsWith(item.to))?.label ?? 'Dashboard';
+  const activeNav = navItems.find((item) => location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to)));
+  const pageTitle = activeNav?.label ?? 'Agricultural Supply Chain';
+
+  // Filter navigation items by current role
+  const visibleNavItems = navItems.filter(
+    (item) => !item.allowedRoles || item.allowedRoles.includes(currentUser.role)
+  );
 
   return (
     <div className="app-layout">
@@ -66,7 +79,7 @@ const AppLayout: React.FC = () => {
         </div>
 
         <nav className="sidebar__nav" aria-label="Main navigation">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -96,13 +109,25 @@ const AppLayout: React.FC = () => {
       <div className="main-content">
         <header className="topbar">
           <h1 className="topbar__title">{pageTitle}</h1>
-          <div className="topbar__actions">
+          <div className="topbar__actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <RoleSwitcher />
             <SimulatedBadge compact />
             <button className="topbar__icon-btn" aria-label="Notifications">
               <Bell size={20} />
             </button>
-            <div className="topbar__avatar" aria-hidden="true">
-              R
+            <div
+              className="topbar__avatar"
+              aria-label={currentUser.name}
+              title={`${currentUser.name} (${currentUser.role})`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.1rem',
+                cursor: 'pointer'
+              }}
+            >
+              {currentUser.avatar}
             </div>
           </div>
         </header>
